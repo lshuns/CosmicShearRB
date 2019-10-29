@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 # input path
-inpathF = "/disks/shear15/ssli/KV450/selected/mine/bins/zb_"
+inpathF = "/disks/shear15/ssli/KV450/selected/pre/bins/zb_"
 inpathL = ["13","35","57","79","912"]
 inpathP = ".h5"
 
@@ -24,8 +24,9 @@ e1w = np.zeros(nboot)
 e2w = np.zeros(nboot)
 
 # output path 
-out = open("/disks/shear15/ssli/KV450/CS/mine/TreeCorr/full/mine/e_vs_ZB.dat", mode='w')
+out = open("/disks/shear15/ssli/KV450/CS/mine/TreeCorr/full/pre/e_vs_ZB.dat", mode='w')
 print("# z_median e1_ave e1_err e2_ave e2_err e1_ave_n e2_ave_n", file=out)
+
 
 for j in range(len(inpathL)):
     print("In z_median =", z_median[j])

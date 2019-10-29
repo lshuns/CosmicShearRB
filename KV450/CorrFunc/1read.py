@@ -67,78 +67,83 @@ Things need to be improved: the form of the out log
 
 import pandas as pd
 from astropy.io import fits
-
-### running information
-log = open("/disks/shear15/ssli/KV450/selected/mine/log.txt", "a")
-
-pathGL = {"G9","G12","G15","G23","GS"}
-
-# input
-inpathF = "/disks/shear15/ssli/KV450/KV450_"
-inpathP = "_reweight_3x4x4_v2_good.cat"
-
-# output
-outpathF = "/disks/shear15/ssli/KV450/selected/mine/"
-outpathP = ".h5"
+import multiprocessing as mp
 
 
-
-for s in pathGL:
-    print("In ", s)
-    print(s, file=log)
+def selection(inpath, outpath, pq):
+    """
+    Function for selection of targets
+    """
     
-    inpath = inpathF + s + inpathP
-    outpath = outpathF + s + outpathP
+    print("In ", inpath[32:35])
     
     hdf = pd.HDFStore(outpath, mode='w')
 
     # with scope making the file be closed automatically
-    with fits.open(inpath, memmap=True) as hdul:
-#        hdul.info()  # information of whole hdul
-        # PrimaryHDU
-#        hdr = hdul[0].header
-#	     print(repr(hdr))
-#        hdr_key = hdr.keys()
-#        print(list(hdr_key))
-
-        # Objects
-#        hdr = hdul[1].header
-#        print(repr(hdr))
-#        hdr_key = hdr.keys()
-#        print(list(hdr_key))
-
-        # Data
-#        data = hdul[1].data
-#        cols = hdul[1].column
-#        print(cols.info())
-#        print(cols.names)
-        
+    with fits.open(inpath, memmap=True) as hdul:        
         df = pd.DataFrame(hdul[1].data)
             
     # Drop undesired columns 
     df.drop(['THELI_NAME','2D_measurement_variance', '2D_measurement_variance_corr'], 
             axis=1, inplace=True)
     
-    print("Succeed in construction.")
-    print("Total objects: ", len(df), file=log)
+    print("Succeed in construction for", inpath[32:35])
+
+    # Total objects
+    Ntot = len(df)
 
     # Selection
-    df = df[(df.GAAP_Flag_ugriZYJHKs == 0)\
-            & (df.MAG_GAAP_r_CALIB > 20) & (df.MAG_GAAP_r_CALIB < 25)\
-            & (df.MAG_GAAP_u_CALIB > -99) & (df.MAG_GAAP_u_CALIB < 99)\
-            & (df.MAG_GAAP_g_CALIB > -99) & (df.MAG_GAAP_g_CALIB < 99)\
-            & (df.MAG_GAAP_i_CALIB > -99) & (df.MAG_GAAP_i_CALIB < 99)\
-            & (df.MAG_GAAP_Z > -99) & (df.MAG_GAAP_Z < 99)\
-            & (df.MAG_GAAP_Y > -99) & (df.MAG_GAAP_Y < 99)\
-            & (df.MAG_GAAP_J > -99) & (df.MAG_GAAP_J < 99)\
-            & (df.MAG_GAAP_H > -99) & (df.MAG_GAAP_H < 99)\
-            & (df.MAG_GAAP_Ks > -99) & (df.MAG_GAAP_Ks < 99)]
+    df = df[df.GAAP_Flag_ugriZYJHKs == 0]
     
-    print("Succeed in selection.")
-    print("objects after selection: ", len(df), file=log)
+    print("Succeed in selection for", inpath[32:35])
 
+    # objects after selection
+    Ns = len(df)
 
     hdf.put(key="whole", value=df, format='table', append=True, data_columns=True)
     hdf.close()
-    print("Succeed in save.")
-        
+
+    # data information
+    logdata = {"patch": inpath[32:35], 'Ntot': Ntot, 'Ns': Ns}
+    pq.put(logdata)
+
+    print("Succeed in save for", inpath[32:35])
+
+if __name__ == "__main__":
+
+    pathGL = ["G9","G12","G15","G23","GS"]
+
+    # input
+    inpathF = "/disks/shear15/ssli/KV450/KV450_"
+    inpathP = "_reweight_3x4x4_v2_good.cat"
+
+    # output
+    outpathF = "/disks/shear15/ssli/KV450/selected/pre/"
+    outpathP = ".h5"
+
+    # for mp
+    jobs = []
+    pq = mp.Queue()
+
+    for s in pathGL:
+        inpath = inpathF + s + inpathP
+        outpath = outpathF + s + outpathP
+
+        p = mp.Process(target=selection, args=(inpath, outpath, pq))
+        jobs.append(p)
+        p.start()
+
+    for p in jobs:
+        p.join()
+
+    print("All processing done.")
+    print("Start saving data information.")
+
+    # data information
+    log = open("/disks/shear15/ssli/KV450/selected/pre/log.txt", "w")
+    print("# patch total_number selected_number", log)
+    while not pq.empty():
+        tmp = pq.get()
+        print(tmp["patch"], tmp['Ntot'], tmp['Ns'], log)
+
+    print("All done.")

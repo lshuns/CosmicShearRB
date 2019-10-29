@@ -19,16 +19,16 @@ Things need to be improved: the form of the out log
 import pandas as pd
     
 # path directory
-inpathF = "/disks/shear15/ssli/KV450/selected/mine/"
+inpathF = "/disks/shear15/ssli/KV450/selected/pre/"
 inpathL = {"G9","G12","G15","G23","GS"}
 inpathP = ".h5"
 
-outpathF = "/disks/shear15/ssli/KV450/selected/mine/bins/zb_"
+outpathF = "/disks/shear15/ssli/KV450/selected/pre/bins/zb_"
 outpathL = {"13","35","57","79","912"} 
 outpathP = ".h5"
 
 ### running information
-log = open("/disks/shear15/ssli/KV450/selected/mine/bins/log.txt", "a")
+log = open("/disks/shear15/ssli/KV450/selected/pre/bins/log.txt", "w")
 
 # out bins
 hdfL = []

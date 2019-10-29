@@ -13,18 +13,17 @@ import numpy as np
 import pandas as pd
 
 # input directory
-# for old result from 3oldCorrFunc.py
-pathinF = "/disks/shear15/ssli/KV450/CS/mine/TreeCorr/full/mine/old/" 
-# for new result from 3newCorrFunc.py
-# pathinF = "/disks/shear15/ssli/KV450/CS/mine/TreeCorr/full/mine/new/" 
+# pathinF = "/disks/shear15/ssli/KV450/CS/mine/TreeCorr/full/pre/" 
+# pathinF = "/disks/shear15/ssli/KV450/CS/mine/TreeCorr/full/pre/slop/" 
+pathinF = "/disks/shear15/ssli/KV450/CS/mine/TreeCorr/full/pre/withoutc/" 
 
 pathinP = ".dat"
 
 # output directory
-# for old
-pathout = "/disks/shear15/ssli/KV450/CS/mine/TreeCorr/xi_mine_old.csv"
-# for new
-# pathout = "/disks/shear15/ssli/KV450/CS/mine/TreeCorr/xi_mine_new.csv"
+# pathout = "/disks/shear15/ssli/KV450/CS/mine/TreeCorr/xi_pre.csv"
+# pathout = "/disks/shear15/ssli/KV450/CS/mine/TreeCorr/xi_pre_slop.csv"
+pathout = "/disks/shear15/ssli/KV450/CS/mine/TreeCorr/xi_pre_withoutc.csv"
+
 
 res = pd.DataFrame(columns=['r_nom', 'meanr', 'meanlogr', 'xi_p/m (real)', 'xi_p/m (abs)', 'sigma_p/m', '(p=1, m=2)', 'itomo', 'jtomo'])
 for i in range(5):
