@@ -1,0 +1,81 @@
+Succeed in loading chunks for e_true
+Succeed in loop 1 for e_true
+Succeed in loop 2 for e_true
+Succeed in loop 3 for e_true
+Succeed in loop 4 for e_true
+Succeed in loop 5 for e_true
+Succeed in loop 6 for e_true
+Finished in e_true
+Data Saved for e_true
+Succeed in loading chunks for e_out
+Succeed in loop 1 for e_out
+Succeed in loop 2 for e_out
+Succeed in loop 3 for e_out
+Succeed in loop 4 for e_out
+Succeed in loop 5 for e_out
+Succeed in loop 6 for e_out
+Finished in e_out
+Data Saved for e_out
+Succeed in loading chunks for ZB9_in
+Succeed in loop 1 for ZB9_in
+Succeed in loop 2 for ZB9_in
+Succeed in loop 3 for ZB9_in
+Succeed in loop 4 for ZB9_in
+Succeed in loop 5 for ZB9_in
+Succeed in loop 6 for ZB9_in
+Finished in ZB9_in
+Data Saved for ZB9_in
+Succeed in loading chunks for bulge_fraction
+Succeed in loop 1 for bulge_fraction
+Succeed in loop 2 for bulge_fraction
+Succeed in loop 3 for bulge_fraction
+Succeed in loop 4 for bulge_fraction
+Succeed in loop 5 for bulge_fraction
+Succeed in loop 6 for bulge_fraction
+Finished in bulge_fraction
+Data Saved for bulge_fraction
+Succeed in loading chunks for N_in
+Succeed in loop 1 for N_in
+Succeed in loop 2 for N_in
+Succeed in loop 3 for N_in
+Succeed in loop 4 for N_in
+Succeed in loop 5 for N_in
+Succeed in loop 6 for N_in
+Finished in N_in
+Data Saved for N_in
+Succeed in loading chunks for snr_model_log
+Succeed in loop 1 for snr_model_log
+Succeed in loop 2 for snr_model_log
+Succeed in loop 3 for snr_model_log
+Succeed in loop 4 for snr_model_log
+Succeed in loop 5 for snr_model_log
+Succeed in loop 6 for snr_model_log
+Finished in snr_model_log
+Data Saved for snr_model_log
+Succeed in loading chunks for mag_in
+Succeed in loop 1 for mag_in
+Succeed in loop 2 for mag_in
+Succeed in loop 3 for mag_in
+Succeed in loop 4 for mag_in
+Succeed in loop 5 for mag_in
+Succeed in loop 6 for mag_in
+Finished in mag_in
+Data Saved for mag_in
+Succeed in loading chunks for mag_out
+Succeed in loop 1 for mag_out
+Succeed in loop 2 for mag_out
+Succeed in loop 3 for mag_out
+Succeed in loop 4 for mag_out
+Succeed in loop 5 for mag_out
+Succeed in loop 6 for mag_out
+Finished in mag_out
+Data Saved for mag_out
+Succeed in loading chunks for TB9_in
+Succeed in loop 1 for TB9_in
+Succeed in loop 2 for TB9_in
+Succeed in loop 3 for TB9_in
+Succeed in loop 4 for TB9_in
+Succeed in loop 5 for TB9_in
+Succeed in loop 6 for TB9_in
+Finished in TB9_in
+Data Saved for TB9_in
