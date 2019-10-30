@@ -9,7 +9,6 @@ Read the original data (fits)
 Set selection criteria
 Save for further use (h5)
 
-Things need to be improved: the form of the out log
 """
 
 # Parameters
@@ -70,12 +69,12 @@ from astropy.io import fits
 import multiprocessing as mp
 
 
-def selection(inpath, outpath, pq):
+def SelecFunc(patch, inpath, outpath, pq):
     """
     Function for selection of targets
     """
     
-    print("In ", inpath[32:35])
+    print("Input data from", inpath)
     
     hdf = pd.HDFStore(outpath, mode='w')
 
@@ -87,7 +86,7 @@ def selection(inpath, outpath, pq):
     df.drop(['THELI_NAME','2D_measurement_variance', '2D_measurement_variance_corr'], 
             axis=1, inplace=True)
     
-    print("Succeed in construction for", inpath[32:35])
+    print("Succeed in construction for", inpath)
 
     # Total objects
     Ntot = len(df)
@@ -95,7 +94,7 @@ def selection(inpath, outpath, pq):
     # Selection
     df = df[df.GAAP_Flag_ugriZYJHKs == 0]
     
-    print("Succeed in selection for", inpath[32:35])
+    print("Succeed in selection", inpath)
 
     # objects after selection
     Ns = len(df)
@@ -104,22 +103,25 @@ def selection(inpath, outpath, pq):
     hdf.close()
 
     # data information
-    logdata = {"patch": inpath[32:35], 'Ntot': Ntot, 'Ns': Ns}
+    logdata = {"patch": patch, 'Ntot': Ntot, 'Ns': Ns}
     pq.put(logdata)
 
-    print("Succeed in save for", inpath[32:35])
+    print("Data saved in", outpath)
 
 if __name__ == "__main__":
-
-    pathGL = ["G9","G12","G15","G23","GS"]
 
     # input
     inpathF = "/disks/shear15/ssli/KV450/KV450_"
     inpathP = "_reweight_3x4x4_v2_good.cat"
 
     # output
-    outpathF = "/disks/shear15/ssli/KV450/selected/pre/"
+    outpathF = "/disks/shear15/ssli/KV450/CorrFunc/data/"
     outpathP = ".h5"
+    
+    # data information
+    log = open("/disks/shear15/ssli/KV450/CorrFunc/log/log_data.csv", "w")
+
+    pathGL = ["G9","G12","G15","G23","GS"]
 
     # for mp
     jobs = []
@@ -129,7 +131,7 @@ if __name__ == "__main__":
         inpath = inpathF + s + inpathP
         outpath = outpathF + s + outpathP
 
-        p = mp.Process(target=selection, args=(inpath, outpath, pq))
+        p = mp.Process(target=SelecFunc, args=(s, inpath, outpath, pq))
         jobs.append(p)
         p.start()
 
@@ -140,10 +142,9 @@ if __name__ == "__main__":
     print("Start saving data information.")
 
     # data information
-    log = open("/disks/shear15/ssli/KV450/selected/pre/log.txt", "w")
-    print("# patch total_number selected_number", log)
+    print("patch,totalNumber,selectedNumber", file=log)
     while not pq.empty():
         tmp = pq.get()
-        print(tmp["patch"], tmp['Ntot'], tmp['Ns'], log)
+        print(tmp["patch"], tmp['Ntot'], tmp['Ns'], sep=',', file=log)
 
     print("All done.")

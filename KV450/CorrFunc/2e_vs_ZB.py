@@ -5,58 +5,106 @@ Created on Wed Oct 16 16:21:10 2019
 
 @author: ssli
 
-weighted average of e for each tomographic bin
+weighted average of e for each tomographic bin and each patch
 """
 
 import numpy as np
 import pandas as pd
-
-# input path
-inpathF = "/disks/shear15/ssli/KV450/selected/pre/bins/zb_"
-inpathL = ["13","35","57","79","912"]
-inpathP = ".h5"
-
-# redshift median
-z_median = [0.2, 0.4, 0.6, 0.8, 1.0]
-
-nboot = 30
-e1w = np.zeros(nboot)
-e2w = np.zeros(nboot)
-
-# output path 
-out = open("/disks/shear15/ssli/KV450/CS/mine/TreeCorr/full/pre/e_vs_ZB.dat", mode='w')
-print("# z_median e1_ave e1_err e2_ave e2_err e1_ave_n e2_ave_n", file=out)
+import multiprocessing as mp
 
 
-for j in range(len(inpathL)):
-    print("In z_median =", z_median[j])
+def MeanFunc(patch, path, Z, bins, pq):
+    """
+    Function for weighted average calculation
+    """
 
-    inpath = inpathF + inpathL[j] + inpathP
-    data = pd.read_hdf(inpath, key='whole', 
-                        columns=["bias_corrected_e1", "bias_corrected_e2", "recal_weight"])
+    hdf = pd.HDFStore(path, mode='r')
+    print("Loaded data from", path)
 
-    e1 = data['bias_corrected_e1'].values
-    e2 = data['bias_corrected_e2'].values
-    wt = data['recal_weight'].values
+    # boots
+    nboot = 30
+    e1w = np.zeros(nboot)
+    e2w = np.zeros(nboot)
 
-    ngals = len(e1)
-    # weighted mean in each boot
-    for i in range(nboot):
-    	idx = np.random.randint(0, ngals, ngals)
-    	sow = np.sum(wt[idx])
-    	e1w[i] = np.dot(e1[idx], wt[idx]) / sow
-    	e2w[i] = np.dot(e2[idx], wt[idx]) / sow
+    for i in range(len(bins)-1):
+    
+        key = Z + '__' + str(bins[i]) + str(bins[i+1])
 
-    e1_ave = np.mean(e1w)
-    e1_err = np.std(e1w)
-    e2_ave = np.mean(e2w)
-    e2_err = np.std(e2w)
+        data = hdf.select(key=key, 
+            columns=["bias_corrected_e1", "bias_corrected_e2", "recal_weight"])
+        print("Selected data from", key)
 
-    # weight mean from direct calculation
-    e1_ave_n = np.dot(e1, wt) / np.sum(wt)
-    e2_ave_n = np.dot(e2, wt) / np.sum(wt)
 
-    print(z_median[j], e1_ave, e1_err, e2_ave, e2_err, e1_ave_n, e2_ave_n, file=out)
-    print("Done with z_median =", z_median[j])
+        e1 = data['bias_corrected_e1'].values
+        e2 = data['bias_corrected_e2'].values
+        wt = data['recal_weight'].values
 
-print("All done.")
+        ngals = len(e1)
+        # weighted mean in each boot
+        for i in range(nboot):
+            idx = np.random.randint(0, ngals, ngals)
+            sow = np.sum(wt[idx])
+            e1w[i] = np.dot(e1[idx], wt[idx]) / sow
+            e2w[i] = np.dot(e2[idx], wt[idx]) / sow
+
+        e1_ave_b = np.mean(e1w)
+        e1_err_b = np.std(e1w)
+        e2_ave_b = np.mean(e2w)
+        e2_err_b = np.std(e2w)
+
+        # weight mean from direct calculation
+        e1_ave = np.dot(e1, wt) / np.sum(wt)
+        e2_ave = np.dot(e2, wt) / np.sum(wt)
+
+        # output
+        out = {"patch": patch, "key": key,
+        'e1_ave': e1_ave, 'e2_ave': e2_ave, 
+        'e1_ave_b': e1_ave_b, 'e1_err_b': e1_err_b, 
+        'e2_ave_b': e2_ave_b, 'e2_err_b': e2_err_b}
+        pq.put(out)
+
+        print("Done with ", key, "for", patch)
+    hdf.close()
+    print("Done with", patch)
+
+
+if __name__ == "__main__":
+
+    bins = [1, 3, 5, 7, 9, 12]
+    patches = ["G9","G12","G15","G23","GS"]
+    # column used as redshift
+    Z = 'Z_B'
+
+    # input path
+    pathF = "/disks/shear15/ssli/KV450/CorrFunc/data/"
+    pathP = ".h5"
+
+    # output path 
+    log = open("/disks/shear15/ssli/KV450/CorrFunc/log/e_vs_ZB.csv", mode='w')
+
+    # for mp
+    jobs = []
+    pq = mp.Queue()
+
+    for patch in patches:
+        path = pathF + patch + pathP
+
+        p = mp.Process(target=MeanFunc, args=(patch, path, Z, bins, pq))
+        jobs.append(p)
+        p.start()
+
+    for p in jobs:
+        p.join()
+
+    print("All processing done.")
+    print("Start saving output.")
+
+    # data information
+    print("patch,key,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log)
+    while not pq.empty():
+        tmp = pq.get()
+        print(tmp['patch'], tmp['key'], tmp['e1_ave'], tmp['e2_ave'],
+            tmp['e1_ave_b'], tmp['e1_err_b'], tmp['e2_ave_b'], tmp['e2_err_b'], sep=',', 
+            file=log)
+
+    print("All done.")
