@@ -13,20 +13,19 @@ import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-# general settings for plot
-# mpl.use('Agg')
-mpl.rcParams['xtick.direction'] = 'in'
-mpl.rcParams['ytick.direction'] = 'in'
-#mpl.rcParams['xtick.top'] = True
-#mpl.rcParams['ytick.right'] = True
-plt.rc('font', size=10)
-
-
 
 def xiPlotFunc(inpaths, names, outpaths, N_bins, pdfORpng, XLIM, YLIM, CR, MK, MS, MW, LS, LW_H, LW_G, PORM):
     """
     Function for xi_pm plot
     """
+
+    # general settings for plot
+    # mpl.use('Agg')
+    mpl.rcParams['xtick.direction'] = 'in'
+    mpl.rcParams['ytick.direction'] = 'in'
+    #mpl.rcParams['xtick.top'] = True
+    #mpl.rcParams['ytick.right'] = True
+    plt.rc('font', size=10)
 
     # data
     paras = []
@@ -183,7 +182,7 @@ if __name__ == "__main__":
     LW_G = 0.5
 
     # save as pdf or png
-    pdfORpng = 'pdf'
+    pdfORpng = 'png'
 
     # plot xi_p or xi_m
     # PORM = 'P'
@@ -204,5 +203,5 @@ if __name__ == "__main__":
     outpaths = [outpath1, outpath2]
 
 
-    # xiPlotFunc(inpaths, names, outpaths, N_bins, pdfORpng, XLIM_P, YLIM, CR, MK, MS, MW, LS, LW_H, LW_G, PORM)
+    xiPlotFunc(inpaths, names, outpaths, N_bins, pdfORpng, XLIM_P, YLIM, CR, MK, MS, MW, LS, LW_H, LW_G, 'P')
     xiPlotFunc(inpaths, names, outpaths, N_bins, pdfORpng, XLIM_M, YLIM, CR, MK, MS, MW, LS, LW_H, LW_G, 'M')
