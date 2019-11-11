@@ -74,13 +74,6 @@ Function for number counting for binning results
 #	 'binary_cut', 'recal_weight', '2D_measurement_variance_corr']
 #
 
-import numpy as np
-import pandas as pd
-import feather
-from astropy.io import fits
-import multiprocessing as mp
-
-
 
 # def setup():
 #     """
@@ -193,6 +186,12 @@ def BinCountFunc(infpath, outpath, Z, bins):
 
 
 if __name__ == "__main__":
+
+    import numpy as np
+    import pandas as pd
+    import feather
+    from astropy.io import fits
+    import multiprocessing as mp
 
     # ++++++++++++++++++++++++++ SelecFunc
     import time

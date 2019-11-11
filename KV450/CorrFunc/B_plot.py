@@ -8,12 +8,6 @@ Created on Thu Oct 31 10:11:02 2019
 Plot 2-p correlation results
 """
 
-import numpy as np
-import pandas as pd
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-
-
 def xiPlotFunc(inpaths, names, outpaths, N_bins, pdfORpng, XLIM, YLIM, CR, MK, MS, MW, LS, LW_H, LW_G, PORM):
     """
     Function for xi_pm plot
@@ -162,6 +156,11 @@ def xiPlotFunc(inpaths, names, outpaths, N_bins, pdfORpng, XLIM, YLIM, CR, MK, M
 
 
 if __name__ == "__main__":
+
+    import numpy as np
+    import pandas as pd
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
 
     # custom settings for plot
     XLIM_P = [0.1, 300]
