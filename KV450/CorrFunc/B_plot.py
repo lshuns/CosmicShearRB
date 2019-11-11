@@ -45,8 +45,8 @@ def xiPlotFunc(inpaths, names, outpaths, N_bins, pdfORpng, XLIM, YLIM, CR, MK, M
         else:
             data = pd.read_csv(path)
             para = pd.DataFrame({'theta': data['meanr'].values, 
-                                'xi': data['xi_p/m (real)'].values, 'err': data['sigma_p/m'].values, 
-                                'pm': data["(p=1, m=2)"].values, 'ito': data["itomo"].values, 'jto': data["jtomo"].values})
+                                'xi': data['xi_pm_real'].values, 'err': data['sigma_pm'].values, 
+                                'pm': data["p1m2"].values, 'ito': data["itomo"].values, 'jto': data["jtomo"].values})
         paras.append(para)
         
     # plot
@@ -193,7 +193,7 @@ if __name__ == "__main__":
 
     # input directory
     inpath_HH = "/disks/shear15/ssli/KV450/Hildebrandt2018/sheardata/KV450_COSMIC_SHEAR_DATA_RELEASE/DATA_VECTOR/KV450_xi_pm_tomographic_data_vector.dat"
-    inpath_new = "/disks/shear15/ssli/KV450/CorrFunc/results.csv"
+    inpath_new = "/disks/shear15/ssli/KV450/CorrFunc/results_whole.csv"
     inpaths = [inpath_HH, inpath_new]
     names = ['Hildebrandt et al. (2018)', 'new']
 
