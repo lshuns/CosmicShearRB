@@ -22,6 +22,11 @@ BinCountFunc:
 Function for number counting for binning results
 """
 
+import numpy as np
+import pandas as pd
+import feather
+from astropy.io import fits
+
 # Parameters
 # ['SeqNr', 'FLUX_AUTO_THELI', 'FLUXERR_AUTO_THELI', 'MAG_AUTO', 'MAGERR_AUTO_THELI', 'KRON_RADIUS_THELI', 
 #	 'BackGr_THELI', 'Level_THELI', 'MU_THRESHOLD_THELI', 'MaxVal_THELI', 'MU_MAX_THELI', 
@@ -186,11 +191,6 @@ def BinCountFunc(infpath, outpath, Z, bins):
 
 
 if __name__ == "__main__":
-
-    import numpy as np
-    import pandas as pd
-    import feather
-    from astropy.io import fits
     import multiprocessing as mp
 
     # ++++++++++++++++++++++++++ SelecFunc

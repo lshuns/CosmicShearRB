@@ -17,6 +17,12 @@ CorrRearrangeFunc:
 Function for rearrange the correlation results
 """
 
+
+import feather
+import treecorr
+import pandas as pd
+import numpy as np
+
 def MeanFunc(e1, e2, wt):
     """
     Function for weighted average calculation
@@ -124,12 +130,7 @@ def CorrRearrangeFunc(Nbins, inpathF, inpathP,outpath):
 
 if __name__ == "__main__":
 
-    import feather
-    import treecorr
     import multiprocessing as mp
-    import pandas as pd
-    import numpy as np
-
     import time
     start_time = time.time()
 

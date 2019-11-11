@@ -12,6 +12,12 @@ CMDFunc:
 Plot the color-magnitude diagram for multiple samples in a single plot
 """
 
+import numpy as np
+import pandas as pd
+import feather
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
 
 def HistFunc(values, wgs, outdirs,
                 COLORS, NBINS, LABELS,
@@ -94,12 +100,6 @@ def CMDFunc(samples, outpaths, bandX, bandY,
 
 
 if __name__=="__main__":
-
-    import numpy as np
-    import pandas as pd
-    import feather
-    import matplotlib as mpl
-    import matplotlib.pyplot as plt
 
     # ++++++++++++++++++++++++++++++++++++++++++++++ HistFunc
     bins = ["13", "35", "57", "79", "912"]

@@ -9,6 +9,8 @@ SplitByNumFunc:
 split sample based on object numbers
 """
 
+import pandas as pd 
+import feather
 
 def SplitByNumFunc(data, para, ratio, outdirF, outdirP):
     """
@@ -38,9 +40,6 @@ def SplitByNumFunc(data, para, ratio, outdirF, outdirP):
 #     """
 
 if __name__ == "__main__":
-
-    import pandas as pd 
-    import feather
 
     bins = ["13", "35", "57", "79", "912"]
     patches = ["G9","G12","G15","G23","GS"]
