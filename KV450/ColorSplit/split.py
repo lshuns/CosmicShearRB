@@ -5,13 +5,12 @@ Created on Wed Nov  6 16:56:40 2019
 
 @author: ssli
 
-do the split
+SplitByNumFunc:
+split sample based on object numbers
 """
 
-import pandas as pd 
-import feather
 
-def splitByNumFunc(data, para, ratio, outdirF, outdirP):
+def SplitByNumFunc(data, para, ratio, outdirF, outdirP):
     """
     Function for sample split based on object numbers
     """
@@ -40,6 +39,9 @@ def splitByNumFunc(data, para, ratio, outdirF, outdirP):
 
 if __name__ == "__main__":
 
+    import pandas as pd 
+    import feather
+
     bins = ["13", "35", "57", "79", "912"]
     patches = ["G9","G12","G15","G23","GS"]
 
@@ -63,4 +65,4 @@ if __name__ == "__main__":
 
             outdirF = outpathF + patch + "_" + Bin
 
-            splitByNumFunc(data, para, ratio, outdirF, outpathP)
+            SplitByNumFunc(data, para, ratio, outdirF, outpathP)
