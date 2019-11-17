@@ -177,7 +177,7 @@ wg_n = "recal_weight"
 # output directory
 outpathF1 = "/disks/shear15/ssli/KV450/Split/hist/hist_TB_"
 outpathF2 = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/Split/hist/hist_TB_"
-outpathP = ".png"
+outpathP = "_wg.png"
 
 # plot related
 XLABEL = "$T_B$"
@@ -189,11 +189,11 @@ LABELS = ['small $T_B$', 'big $T_B$']
 
 for Bin in bins:
     for patch in patches:
-        inpath1 = inpathF + patch + "_" + Bin + "_head" + inpathP
+        inpath1 = inpathF + patch + "_" + Bin + "_head_wg" + inpathP
         sample1 = feather.read_dataframe(inpath1)
         print("Loaded data from", inpath1)
 
-        inpath2 = inpathF + patch + "_" + Bin + "_tail" + inpathP
+        inpath2 = inpathF + patch + "_" + Bin + "_tail_wg" + inpathP
         sample2 = feather.read_dataframe(inpath2)
         print("Loaded data from", inpath2)
 
