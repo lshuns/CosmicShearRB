@@ -31,13 +31,15 @@ def HistPlotFunc(values, wgs, outpaths,
     fig = plt.figure()
     for i in range(len(values)):
         value = values[i]
-        wg = wgs[i]
-
         NB = NBs[i]
         COLOR = COLORs[i]
         LABEL = LABELs[i]
     
-        plt.hist(x=value, bins=NB, density=DENSITY, weights=wg, color=COLOR, label=LABEL, histtype=HISTTYPE)
+        if wgs==None:
+            plt.hist(x=value, bins=NB, density=DENSITY, color=COLOR, label=LABEL, histtype=HISTTYPE)
+        else:
+            wg = wgs[i]
+            plt.hist(x=value, bins=NB, density=DENSITY, weights=wg, color=COLOR, label=LABEL, histtype=HISTTYPE)
 
     if LABELs[0] != None:
         plt.legend(frameon=False)
