@@ -1,1 +1,1 @@
-Codes for general purposes
+Scripts for general purposes
