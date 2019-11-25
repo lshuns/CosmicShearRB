@@ -15,7 +15,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 def HistPlotFunc(values, wgs, outpaths, 
-    DENSITY, HISTTYPE, NBs, COLORs, LABLEs,
+    DENSITY, HISTTYPE, NBs, COLORs, LABELs,
     XLABEL, YLABEL):
     """
     Function for histogram plot
@@ -35,11 +35,11 @@ def HistPlotFunc(values, wgs, outpaths,
 
         NB = NBs[i]
         COLOR = COLORs[i]
-        LABLE = LABLEs[i]
+        LABEL = LABELs[i]
     
-        plt.hist(x=value, bins=NB, density=DENSITY, weights=wg, color=COLOR, label=LABLE, histtype=HISTTYPE)
+        plt.hist(x=value, bins=NB, density=DENSITY, weights=wg, color=COLOR, label=LABEL, histtype=HISTTYPE)
 
-    if LABELS[0] != None:
+    if LABELs[0] != None:
         plt.legend(frameon=False)
 
     plt.xlabel(XLABEL)
