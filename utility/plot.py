@@ -5,6 +5,8 @@ Created on Tue Oct 15 13:50:48 2019
 
 @author: ssli
 
+Functions for plotting
+
 HistPlotFunc:
 make the histogram plot
 """
