@@ -185,7 +185,7 @@ if __name__=='__main__':
     dat = pd.concat(data_tmp, ignore_index=True)
 
     # SNR
-    v1_KV450 = dat['model_SNratio'].values + 0.000001
+    v1_KV450 = dat['model_SNratio'].values
 
     # measured ellipticity ????????????????
     e1_meas_KV450 = dat['bias_corrected_e1'].values
