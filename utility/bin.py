@@ -27,7 +27,6 @@ def SimpleBinFunc(data, para, bins, Bounds='oc',
     """
     Function for binning (simple case)
     """
-    print("Start binning (SimpleBinFunc)...")
 
     if saveLog:
         log = open(pathLog, "w")
@@ -60,8 +59,6 @@ def SimpleBinFunc(data, para, bins, Bounds='oc',
             key = str(vmin) + '_' + str(vmax)
             print(key, N, sep=',', file=log)
 
-    print("Finished binning (SimpleBinFunc).")
-
     if ~saveRes:
         return data_final
 
@@ -70,7 +67,6 @@ def WgQuantile1DFunc(values, weights, pq):
     Function for the weighted quantile of a 1D numpy array.
 
     """
-    print("Start computing the weighted quantile (WgQuantile1DFunc)...")
 
     # Sort the data
     ind_sorted = np.argsort(values)
@@ -84,7 +80,6 @@ def WgQuantile1DFunc(values, weights, pq):
     # Get the quantiles
     res = np.interp(pq, Pn, v_sorted)
     
-    print("Finished computing the weighted quantile (WgQuantile1DFunc).")
     return res
 
 
@@ -92,7 +87,6 @@ def WgBin2DFunc(v1, v2, wgs, Nbin1, Nbin2):
     """
     Function for binning using weighted quantiles
     """
-    print("Start binning (WgBin2DFunc)...")
 
     # Define the probabilities for the quantiles based on the number of bins
     pq1 = np.linspace(0,1.0,Nbin1+1)
@@ -111,7 +105,6 @@ def WgBin2DFunc(v1, v2, wgs, Nbin1, Nbin2):
         # q1s.append(q1)
         q2s.append(q2)
 
-    print("Finished binning (WgQuantile1DFunc).")
     # return np.array(q1s), np.array(q2s)
     return q1, np.array(q2s)
 
@@ -124,7 +117,9 @@ if __name__=='__main__':
     Start = time.time()
 
     # data
-    inpath = "/disks/shear15/ssli/SimCat/old/Selec__ZB9_in__13.feather"
+    # inpath = "/disks/shear15/ssli/SimCat/Bin_Arun_all_13_PSF__ZB9_in__13.feather"
+    inpath = "/disks/shear15/ssli/SimCat/Bin_all_13_PSF__ZB9_in__13.feather"
+
     data = feather.read_dataframe(inpath)
 
     # Number of bins
@@ -158,10 +153,37 @@ if __name__=='__main__':
     # print(f"Running time: {time.time()-Start}")
     # Running time: 0.440138578414917
 
+    # for i in range(Nbin1):
+    #     mask1 = (v1>=v1_bounds[i])&(v1<v1_bounds[i+1])
+    #     wg_bin = np.sum(wg[mask1])
+    #     print(wg_bin)
+
+    for i in range(Nbin1):
+        mask1 = (v1>=v1_bounds[i])&(v1<v1_bounds[i+1])
+        v2_bound = v2_bounds[i]
+        for j in range(Nbin2):
+            mask2 = (v2>=v2_bound[j])&(v2<v2_bound[j+1])
+            mask = mask1 & mask2
+
+            wg_bin = np.sum(wg[mask])
+
+            print(wg_bin)
+    # Max: 40070.86
+    # Min: 38540.78
+
+
     # calculate the sum of lensfit weights in each bin
     # KV450
-    inpath = "/disks/shear15/ssli/KV450/selected/G12__Z_B__13.feather"
-    dat = feather.read_dataframe(inpath)
+    indir = "/disks/shear15/ssli/KV450/selected/"
+    patches = ["G9","G12","G15","G23","GS"]
+    inP = "__Z_B__13.feather"
+    
+    data_tmp = []
+    for patch in patches:
+        inpath = indir + patch + inP
+        data_tmp.append(feather.read_dataframe(inpath))
+    dat = pd.concat(data_tmp, ignore_index=True)
+
     # SNR
     v1_KV450 = dat['model_SNratio'].values + 0.000001
 
@@ -184,7 +206,6 @@ if __name__=='__main__':
     wg_KV450 = dat['recal_weight'].values
 
 
-
     for i in range(Nbin1):
         mask1 = (v1>=v1_bounds[i])&(v1<v1_bounds[i+1])
         mask1_KV450 = (v1_KV450>=v1_bounds[i])&(v1_KV450<v1_bounds[i+1])
@@ -201,7 +222,8 @@ if __name__=='__main__':
             wg_bin_KV450 = np.sum(wg_KV450[mask_KV450])
 
             print(wg_bin/wg_bin_KV450)
-
+    # Max: 5.5
+    # Min: 0.9
 
 
 
