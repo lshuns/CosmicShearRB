@@ -101,41 +101,44 @@ if __name__ == "__main__":
     # ++++++++++++++++++++++++++++++ MCFunc
     # data
     # inpath = "/disks/shear15/ssli/SimCat/SimCatOrigi.feather"
-    # inpath = "/disks/shear15/ssli/SimCat/SimCatSelec_Arun_all_13_PSF.feather"
-    inpath = "/disks/shear15/ssli/SimCat/SimCatSelec_all_13_PSF.feather"
-
-    data = feather.read_dataframe(inpath)
-    g1 = data['g1'].values
-    g2 = data['g2'].values
-
-    wg = data['LFweight'].values
-    e1 = data['e1'].values
-    e2 = data['e2'].values
-
+    inpath_Arun = "/disks/shear15/ssli/SimCat/SimCatSelec_Arun_all_13_PSF.feather"
+    inpath_new = "/disks/shear15/ssli/SimCat/SimCatSelec_all_13_PSF.feather"
+    inpath_low = "/disks/shear15/ssli/SimCat/split/SimCatSelec_all_13_PSF_TB9_in_3_less.feather"
+    inpath_high = "/disks/shear15/ssli/SimCat/split/SimCatSelec_all_13_PSF_TB9_in_3_greater.feather"
+    inpaths = [inpath_Arun, inpath_new, inpath_high, inpath_low]
 
     # linregress
     METHOD = 'linregress'
     Start = time.time()
-    
-    MCFunc(g1, g2, e1, e2, wg, METHOD)
-    print("Running time for linregress:", time.time()-Start)
-    # Running time for linregress: 0.8835294246673584
 
+    for path in inpaths:
+        data = feather.read_dataframe(path)
+        g1 = data['g1'].values
+        g2 = data['g2'].values
+
+        wg = data['LFweight'].values
+        e1 = data['e1'].values
+        e2 = data['e2'].values
+
+        print(path)
+    
+        MCFunc(g1, g2, e1, e2, wg, METHOD)
+
+    print("Running time", time.time()-Start)
+    
+
+# /disks/shear15/ssli/SimCat/SimCatSelec_Arun_all_13_PSF.feather
 # m1 = -0.008226157898461817 +- 0.0011035142956440916
 # m2 = -0.005615895528964132 +- 0.0011894159333708442
-# c1 = 0.00010176980867981911 +- None
-# c2 = 0.0007877680473029613 +- None
 
+# /disks/shear15/ssli/SimCat/SimCatSelec_all_13_PSF.feather
+# m1 = -0.006390492795793401 +- 0.0009419661670895168
+# m2 = -0.004149017271736111 +- 0.0012030771371226198
 
-    # curve_fit
-    METHOD = 'curve_fit'
-    Start = time.time()
-    
-    MCFunc(g1, g2, e1, e2, wg, METHOD)
-    print("Running time for curve_fit:", time.time()-Start)
-    # Running time for curve_fit: 0.8620116710662842
+# /disks/shear15/ssli/SimCat/split/SimCatSelec_all_13_PSF_TB9_in_3_greater.feather
+# m1 = 0.003443817090559742 +- 0.0011026532287912445
+# m2 = 0.009581121655187985 +- 0.0013579449791004464
 
-# m1 = -0.008226157956150568 +- 0.001103514332243542
-# m2 = -0.005615895240730806 +- 0.001189417034808952
-# c1 = 0.00010176959425471485 +- 3.1220791879571026e-05
-# c2 = 0.0007877682913796833 +- 3.365112068114336e-05
+# /disks/shear15/ssli/SimCat/split/SimCatSelec_all_13_PSF_TB9_in_3_less.feather
+# m1 = -0.01973750966868082 +- 0.001940890385471888
+# m2 = -0.02278890408800005 +- 0.0020136098135490133
