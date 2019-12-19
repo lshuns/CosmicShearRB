@@ -9,19 +9,12 @@ MCFunc:
     Function for fitting m and c from data
 
 
-Bug:
-    Error from METHOD = 'self' (MCFunc) is wrong
 """
 
 import feather
 import pandas as pd
 import numpy as np
 from scipy import stats, optimize
-
-import os
-import sys
-sys.path.insert(0,os.path.realpath('..')) 
-from utility import LinearFitFunc
 
 def mcFitFunc(x, m, c):
     """
@@ -72,22 +65,6 @@ def MCFunc(g1, g2, e1, e2, wg,
         c2 = intercept2
         sc2 = None
 
-    elif METHOD == 'self':
-        # Using self-defined LinearFitFunc
-        print("Using self-defined LinearFitFunc from utility/fitting.py")
-        a, b, sa, sb, rchi2, dof = LinearFitFunc(g1Range, g1_meas)
-        a2, b2, sa2, sb2, rchi22, dof2 = LinearFitFunc(g2Range, g2_meas)
-
-        m1 = a - 1.
-        sm1 = sa
-        m2 = a2 - 1.
-        sm2 = sa2
-        #
-        c1 = b
-        sc1 = sb
-        c2 = b2
-        sc2 = sb2
-
     elif METHOD == 'curve_fit':
         # Using curve_fit
         print("Using curve_fit from scipy.optimize")
@@ -127,7 +104,6 @@ if __name__ == "__main__":
     # inpath = "/disks/shear15/ssli/SimCat/SimCatSelec_Arun_all_13_PSF.feather"
     inpath = "/disks/shear15/ssli/SimCat/SimCatSelec_all_13_PSF.feather"
 
-
     data = feather.read_dataframe(inpath)
     g1 = data['g1'].values
     g2 = data['g2'].values
@@ -135,6 +111,7 @@ if __name__ == "__main__":
     wg = data['LFweight'].values
     e1 = data['e1'].values
     e2 = data['e2'].values
+
 
     # linregress
     METHOD = 'linregress'
@@ -148,20 +125,6 @@ if __name__ == "__main__":
 # m2 = -0.005615895528964132 +- 0.0011894159333708442
 # c1 = 0.00010176980867981911 +- None
 # c2 = 0.0007877680473029613 +- None
-
-
-    # self
-    METHOD = 'self'
-    Start = time.time()
-    
-    MCFunc(g1, g2, e1, e2, wg, METHOD)
-    print("Running time for self:", time.time()-Start)
-    # Running time for self: 0.886962890625
-
-# m1 = -0.008226157898461817 +- 12.496524887206434
-# m2 = -0.005615895528964132 +- 12.496524887206434
-# c1 = 0.00010176980867981912 +- 0.3535533905932738
-# c2 = 0.0007877680473029613 +- 0.3535533905932738
 
 
     # curve_fit
