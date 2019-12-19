@@ -95,7 +95,7 @@ def SplitByWgFunc(data, para, wg, ratio, outdirF, outdirP):
 
 if __name__ == "__main__":
 
-    # +++++++++++++++++ worn out (used for SplitByNumFunc)
+    # +++++++++++++++++ SplitByNumFunc (worn out)
     # bins = ["13", "35", "57", "79", "912"]
     # patches = ["G9","G12","G15","G23","GS"]
 
@@ -123,7 +123,7 @@ if __name__ == "__main__":
 
 
 
-    # +++++++++++++++++ worn out (used for SplitByNumFunc)
+    # +++++++++++++++++ SplitByWgFunc
     bins = ["13", "35", "57", "79", "912"]
     patches = ["G9","G12","G15","G23","GS"]
 

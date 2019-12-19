@@ -5,7 +5,7 @@ Created on Mon Nov 11 14:50:06 2019
 
 @author: ssli
 
-histFunc:
+HistFunc:
 Plot the hist of desired parameter for multiple samples in a single plot
 
 CMDFunc:
