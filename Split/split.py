@@ -10,6 +10,9 @@ split sample based on object numbers
 
 SplitByWgFunc:
 split sample based on object weights (wg)
+
+SplitByValFunc:
+split sample based on a specific value
 """
 
 import pandas as pd 
@@ -88,12 +91,29 @@ def SplitByWgFunc(data, para, wg, ratio, outdirF, outdirP):
     print("Data saved to", outdir)
 
 
-# def splitByValFunc():
-#     """
-#     Function for sample split based on specific values
-#     """
+def SplitByValFunc(data, para, cvalue, wg, outdir, savekey):
+    """
+    Function for sample split based on a specific value
+    """
+    print("Total weight for whole data", np.sum(data[wg].values))
+    data1 = data[data[para]<=cvalue]
+    data2 = data[data[para]>cvalue]
+    print("Total weight for low part", np.sum(data1[wg].values))
+    print("Total weight for high part", np.sum(data2[wg].values))
+
+    outpath = outdir + savekey + para + '_' + str(cvalue) + '_less.feather'
+    data1 = data1.reset_index(drop=True)
+    data1.to_feather(outpath)
+    print("Low data saved to", outpath)
+
+    outpath = outdir + savekey + para + '_' + str(cvalue) + '_greater.feather'
+    data2 = data2.reset_index(drop=True)
+    data2.to_feather(outpath)
+    print("High data saved to", outpath)
+
 
 if __name__ == "__main__":
+    import time
 
     # +++++++++++++++++ SplitByNumFunc (worn out)
     # bins = ["13", "35", "57", "79", "912"]
@@ -123,29 +143,115 @@ if __name__ == "__main__":
 
 
 
-    # +++++++++++++++++ SplitByWgFunc
-    bins = ["13", "35", "57", "79", "912"]
-    patches = ["G9","G12","G15","G23","GS"]
+    # # +++++++++++++++++ SplitByWgFunc
+    # bins = ["13", "35", "57", "79", "912"]
+    # patches = ["G9","G12","G15","G23","GS"]
 
-    # input directory
-    inpathF = "/disks/shear15/ssli/KV450/CorrFunc/data/feather/"
-    inpathP = ".feather"
+    # # input directory
+    # inpathF = "/disks/shear15/ssli/KV450/CorrFunc/data/feather/"
+    # inpathP = ".feather"
 
-    para = "T_B"
-    wg = "recal_weight"
-    ratio = 0.5
+    # para = "T_B"
+    # wg = "recal_weight"
+    # ratio = 0.5
 
-    # output directory
-    outpathF = "/disks/shear15/ssli/KV450/Split/data/halfHalf/"
-    outpathP = ".feather"
+    # # output directory
+    # outpathF = "/disks/shear15/ssli/KV450/Split/data/halfHalf/"
+    # outpathP = ".feather"
 
 
-    for Bin in bins:
-        for patch in patches:
-            inpath = inpathF + patch + "_" + Bin + inpathP
-            data = feather.read_dataframe(inpath)
-            print("Data loaded from", inpath)
+    # for Bin in bins:
+    #     for patch in patches:
+    #         inpath = inpathF + patch + "_" + Bin + inpathP
+    #         data = feather.read_dataframe(inpath)
+    #         print("Data loaded from", inpath)
 
-            outdirF = outpathF + patch + "_" + Bin
+    #         outdirF = outpathF + patch + "_" + Bin
 
-            SplitByWgFunc(data, para, wg, ratio, outdirF, outpathP)
+    #         SplitByWgFunc(data, para, wg, ratio, outdirF, outpathP)
+
+    # +++++++++++++++++++ SplitByValFunc
+    # # SimIm (Bins)
+    # Start = time.time()
+
+    # indir = "/disks/shear15/ssli/SimCat/"
+    # ingene = 'Bin_all_13_PSF__ZB9_in__'
+
+    # bins = ['13', '35', '57', '79', '912']
+
+    # para = 'TB9_in'
+    # cvalue = 3
+    # wg = 'LFweight'
+
+    # # out
+    # outdir = "/disks/shear15/ssli/SimCat/split/"
+
+    # for Bin in bins:
+    #     inpath = indir + ingene + Bin + '.feather'
+    #     data = feather.read_dataframe(inpath)
+    #     print("Data loaded from", inpath)
+
+    #     savekey = ingene + Bin + '_'
+
+    #     SplitByValFunc(data, para, cvalue, wg, outdir, savekey)
+
+    # print("Finished in", time.time()-Start)
+    # # Finished in 8.959846496582031
+
+
+    # SimIm (whole)
+    Start = time.time()
+
+    indir = "/disks/shear15/ssli/SimCat/"
+    ingene = 'SimCatSelec_all_13_PSF'
+
+    para = 'TB9_in'
+    cvalue = 3
+    wg = 'LFweight'
+
+    # out
+    outdir = "/disks/shear15/ssli/SimCat/split/"
+
+    inpath = indir + ingene + '.feather'
+    data = feather.read_dataframe(inpath)
+    print("Data loaded from", inpath)
+
+    savekey = ingene + '_'
+
+    SplitByValFunc(data, para, cvalue, wg, outdir, savekey)
+
+    print("Finished in", time.time()-Start)
+    # Finished in 12.693177700042725
+
+
+    # # KV450
+    # Start = time.time()
+
+    # indir = "/disks/shear15/ssli/KV450/CorrFunc/data/feather/"
+
+    # bins = ['13', '35', '57', '79', '912']
+    # patches = ["G9","G12","G15","G23","GS"]
+
+    # para = 'T_B'
+    # cvalue = 3
+    # wg = 'recal_weight'
+
+    # # out
+    # outdir = "/disks/shear15/ssli/KV450/Split/data/"
+
+    # for Bin in bins:
+    #     for patch in patches:
+    #         inpath = indir + patch + "_" + Bin + '.feather'
+    #         data = feather.read_dataframe(inpath)
+    #         print("Data loaded from", inpath)
+
+    #         savekey = patch + '_' + Bin + '_'
+
+    #         SplitByValFunc(data, para, cvalue, wg, outdir, savekey)
+
+    # print("Finished in", time.time()-Start)
+    # # Finished in 
+
+
+
+

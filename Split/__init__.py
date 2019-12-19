@@ -8,4 +8,4 @@ Created on Mon Nov 11 15:03:13 2019
 
 # defined modules
 from Split.plot import HistFunc, CMDFunc
-from Split.split import SplitByNumFunc
+from Split.split import SplitByWgFunc, SplitByValFunc
