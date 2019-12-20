@@ -140,7 +140,7 @@ if __name__=='__main__':
     # r_psf
     size_psf = data['psf_size_in'].values
     # R
-    v2 = size_psf**2./(size_ab**2.+size_psf**2.)
+    v2 = size_psf/(size_ab**2.+size_psf)
 
     # weights
     wg = data['LFweight'].values
@@ -168,8 +168,6 @@ if __name__=='__main__':
             wg_bin = np.sum(wg[mask])
 
             print(wg_bin)
-    # Max: 40070.86
-    # Min: 38540.78
 
 
     # calculate the sum of lensfit weights in each bin
@@ -200,7 +198,7 @@ if __name__=='__main__':
     psf_Q22 = dat['PSF_Q22'].values
     size_psf_KV450 = (psf_Q11*psf_Q22-psf_Q12**2)**0.5
     # R
-    v2_KV450 = size_psf_KV450**2./(size_ab_KV450**2.+size_psf_KV450**2.)
+    v2_KV450 = size_psf_KV450/(size_ab_KV450**2.+size_psf_KV450)
 
     # weights
     wg_KV450 = dat['recal_weight'].values
@@ -222,9 +220,6 @@ if __name__=='__main__':
             wg_bin_KV450 = np.sum(wg_KV450[mask_KV450])
 
             print(wg_bin/wg_bin_KV450)
-    # Max: 5.5
-    # Min: 0.9
-
 
 
 
