@@ -66,16 +66,16 @@ def BinFunc(indata, Z, bins, outdir, save_key, pq=None):
     for i in range(len(bins)-1):
         zmin = bins[i]
         zmax = bins[i+1]
-        indata = indata[(indata[Z] > zmin) & (indata[Z] <= zmax)]
+        indataBin = indata[(indata[Z] > zmin) & (indata[Z] <= zmax)]
         #
         outpath = outdir + save_key + '_bin' + str(i) + '.feather'
-        indata = indata.reset_index(drop=True)
-        indata.to_feather(outpath)
+        indataBin = indataBin.reset_index(drop=True)
+        indataBin.to_feather(outpath)
 
 
         if pq != None:
             # selected numbers
-            N_bin = len(indata)
+            N_bin = len(indataBin)
             # data information
             logdata = {"save_key": save_key, 'bin': str(i), 'number': N_bin}
             pq.put(logdata)
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     print("Running time for BinCountFunc", end_BinCountFunc-start_BinCountFunc, "seconds.")
 
     # Running on markermeer
-# Running time for SelecFunc 263.9306733608246 seconds.
-# Running time for BinFunc 20.77444362640381 seconds.
-# Running time for PatchFunc 26.071428060531616 seconds.
-# Running time for BinCountFunc 0.01830768585205078 seconds.
+# Running time for SelecFunc 288.9934558868408 seconds.
+# Running time for BinFunc 213.1210536956787 seconds.
+# Running time for PatchFunc 288.5020520687103 seconds.
+# Running time for BinCountFunc 0.04869437217712402 seconds.
