@@ -6,16 +6,13 @@ Created on Mon Jan 13 15:25:29 2020
 @author: ssli
 
 SelecFunc (mp supported):
-    set selection and re-save the original data
+    Apply mask and re-save the downloaded catalogues.
 
-BinFunc (mp supported):
-    binning data and save
-BinCountFunc
-    Bin number counts
-        associated with BinFunc with pq!=None
+TomoBinFunc (mp supported):
+    Build and save the tomographic catalogues.
 
-PatchFunc:
-    combining all patches
+CombPatchFunc (mp supported):
+    Combine all patches.
 """
 
-from KV450.DataPreprocess import SelecFunc, BinFunc, BinCountFunc, PatchFunc
+from KV450.DataProcess import SelecFunc, TomoBinFunc, CombPatchFunc

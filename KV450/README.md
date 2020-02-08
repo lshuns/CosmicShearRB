@@ -1,4 +1,4 @@
-Scripts to deal with KV450 data
+Codes to deal with KV450 lensing catalogues (http://kids.strw.leidenuniv.nl/DR3/kv450data.php)
 
 Columns in KV450 catalogues:
 
