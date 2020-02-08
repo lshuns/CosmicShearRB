@@ -68,6 +68,7 @@ def SelecFunc(inpath,
     outpath = outdir + save_name + ".feather"
     df_selection = df_selection.reset_index(drop=True)
     df_selection.to_feather(outpath)
+    print("Selected data saved in ", outpath)
     
     # data information
     if pq != None:
@@ -118,6 +119,7 @@ def TomoBinFunc(indata, z_col, zbins_min, zbins_max,
         outpath = outdir + save_name_prefix + '_tomo' + str(i+1) + '.feather'
         indataBin = indataBin.reset_index(drop=True)
         indataBin.to_feather(outpath)
+        print("Binned data saved in ", outpath)
 
         # data information
         if pq != None:
@@ -162,6 +164,7 @@ def CombPatchFunc(indir, id_tomo, patches, outdir, pq=None):
     outpath = outdir + 'all_tomo' + str(id_tomo) +'.feather'
     res = res.reset_index(drop=True)
     res.to_feather(outpath)
+    print("Combined data saved in ", outpath)
 
     # data information
     if pq != None:
