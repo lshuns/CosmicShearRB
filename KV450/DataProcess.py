@@ -13,6 +13,13 @@ SelecFunc (mp supported):
 TomoBinFunc (mp supported):
     Build and save the tomographic catalogues.
 
+    The fiducial KV450 cosmic shear bins:
+    Bin1: (0.1, 0.3]
+    Bin2: (0.3, 0.5]
+    Bin3: (0.5, 0.7]
+    Bin4: (0.7, 0.9]
+    Bin5: (0.9, 1.2]
+
 CombPatchFunc (mp supported):
     Combine all patches.
 
