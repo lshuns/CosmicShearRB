@@ -16,15 +16,14 @@ from astropy.io import fits
 
 import time
 
-# Self-defined package
 import os
 import sys
+# Self-defined package
 sys.path.insert(0,os.path.realpath('..')) 
-
 from KV450 import SelecFunc, TomoBinFunc, CombPatchFunc
 
 
-# ++++++++++++++++++++++++++ Preform mask
+# ++++++++++++++++++++++++++ selection
 start_SelecFunc = time.time()
 
 # input
