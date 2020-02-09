@@ -4,8 +4,11 @@
 Created on Mon Nov 11 15:03:13 2019
 
 @author: ssli
+
+Module to perform split of sources
+
+SplitByValFunc:
+Split sample based on a specific value.
 """
 
-# defined modules
-from Split.plot import HistFunc, CMDFunc
-from Split.split import SplitByWgFunc, SplitByValFunc
+from Split.Split import SplitByValFunc
