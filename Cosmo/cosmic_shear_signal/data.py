@@ -133,7 +133,7 @@ class Data(object):
             exec("self.%s = Container()" % structure)
 
         param_path = os.path.join(self.paths['param'], param)
-        with open(param, 'r') as param_file:
+        with open(param_path, 'r') as param_file:
             for line in param_file:
                 if line.find('#') == -1 and line:
                     lhs = line.split('=')[0]

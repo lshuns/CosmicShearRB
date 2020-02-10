@@ -25,10 +25,10 @@ data.cosmo_arguments['c_min']        = 2.484
 # ++++++++++++++++ Derived parameters:
 
 # Matter density
-#data.cosmo_arguments['Omega_m']      = 0.256
+#['Omega_m']      = 0.256
 
 # Power spectrum amplitude
-#data.cosmo_arguments['sigma8']       = 0.836
+#['sigma8']       = 0.836
 
 # ++++++++++++++++ Other cosmo parameters (fixed parameters, precision parameters, etc.)
 

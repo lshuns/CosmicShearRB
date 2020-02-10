@@ -19,17 +19,10 @@ import math
 import io_cs
 
 
-try:
-    xrange
-except NameError:
-    xrange = range
-
-
 def CSsignalFunc(data, cosmo):
     """
     Modeling the cosmic shear signal from theory 
     """
-
 
     # Number of bins
     nzbins = len(data.const['z_bins_min'])
@@ -37,14 +30,12 @@ def CSsignalFunc(data, cosmo):
     nzcorrs = int(nzbins * (nzbins + 1) / 2)
 
     # read in data vector
-    temp = io_cs.ReadDataVectorFunc(data, nzbins, nzcorrs)
-    theta_bins = temp[:, 0]
-
-    # create the data-vector:
-    # xi_obs = {xi1(theta1, z_11)...xi1(theta_k, z_11), xi2(theta_1, z_11)...
-    #           xi2(theta_k, z_11);...; xi1(theta1, z_nn)...xi1(theta_k, z_nn),
-    #           xi2(theta_1, z_nn)... xi2(theta_k, z_nn)}
-    xi_obs = OrderXiFunc(temp[:, 1:], data.const['ntheta'], nzcorrs)
+    # the theta list is the one actually used
+    path_tmp = os.path.join(data.paths['data'], 'data_vector/for_cosmo/' + data.conf['prefix_data_vector'] + data.conf['sample'] + '.dat')
+    theta, _, _ = np.loadtxt(path_tmp, unpack=True)
+    print('Loaded data vectors from: \n', path_tmp)
+    # we assume theta is same for xi_p and xi_m
+    theta_bins = np.concatenate((theta, theta))
 
     # Read angular cut values
     if data.conf['use_cut_theta']:
@@ -54,8 +45,6 @@ def CSsignalFunc(data, cosmo):
         mask_indices = np.where(mask == 1)[0]
         mask_suffix = data.conf['cutvalues_file'][:-4]
 
-    # write out masked data vector:
-    io_cs.WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, xi_obs, data.conf['prefix_signal'])
         
     # This is for Cl-integration only!
     # Define array of l values, and initialize them
@@ -88,7 +77,7 @@ def CSsignalFunc(data, cosmo):
 
     pz = np.zeros((nzmax, nzbins))
     pz_norm = np.zeros(nzbins)
-    for zbin in xrange(nzbins):
+    for zbin in range(nzbins):
         # we assume that the histograms loaded are given as left-border histograms
         # and that the z-spacing is the same for each histogram
         spline_pz = itp.interp1d(z_samples[zbin, :], hist_samples[zbin, :], kind=data.conf['type_redshift_interp'])
@@ -135,7 +124,7 @@ def CSsignalFunc(data, cosmo):
     a2r = math.pi / (180. * 60.)
 
     # define an array of thetas
-    for it in xrange(nthetatot):
+    for it in range(nthetatot):
         theta[it] = thetamin * math.exp(data.const['dlntheta'] * it)
 
 
@@ -163,7 +152,7 @@ def CSsignalFunc(data, cosmo):
         while (ll*theta[-1]*a2r < data.const['dx_threshold']):
             ll += data.const['dx_below_threshold']/theta[-1]/a2r
             il += 1
-        for it  in xrange(nthetatot):
+        for it  in range(nthetatot):
             while (ll*theta[nthetatot-1-it]*a2r < data.const['xmax']) and (ll+data.const['dx_above_threshold']/theta[nthetatot-1-it]/a2r < data.const['lmax']):
                 ll += data.const['dx_above_threshold']/theta[nthetatot-1-it]/a2r
                 il += 1
@@ -176,7 +165,7 @@ def CSsignalFunc(data, cosmo):
         while (lll[il]*theta[-1]*a2r < data.const['dx_threshold']):
             il += 1
             lll[il] = lll[il-1] + data.const['dx_below_threshold']/theta[-1]/a2r
-        for it in xrange(nthetatot):
+        for it in range(nthetatot):
             while (lll[il]*theta[nthetatot-1-it]*a2r < data.const['xmax']) and (lll[il] + data.const['dx_above_threshold']/theta[nthetatot-1-it]/a2r < data.const['lmax']):
                 il += 1
                 lll[il] = lll[il-1] + data.const['dx_above_threshold']/theta[nthetatot-1-it]/a2r
@@ -186,7 +175,7 @@ def CSsignalFunc(data, cosmo):
         # (l is a factor in the integrand [l * C_l * Bessel], and dl is like a weight)
         ldl = np.zeros(nl)
         ldl[0]=lll[0]*0.5*(lll[1]-lll[0])
-        for il in xrange(1,nl-1):
+        for il in range(1,nl-1):
             ldl[il]=lll[il]*0.5*(lll[il+1]-lll[il-1])
         ldl[-1]=lll[-1]*0.5*(lll[-1]-lll[-2])
     else:
@@ -226,7 +215,7 @@ def CSsignalFunc(data, cosmo):
 
         int_weight_func = np.zeros(data.const['ntheta'])
         thetas_for_theory_binning = np.zeros((data.const['ntheta'], int(data.const['theta_nodes_theory'])))
-        for idx_theta in xrange(data.const['ntheta']):
+        for idx_theta in range(data.const['ntheta']):
             theta_tmp = np.linspace(theta_bin_min[idx_theta], theta_bin_max[idx_theta], int(data.const['theta_nodes_theory']))
             dtheta = (theta_tmp[1:] - theta_tmp[:-1]) * a2r
 
@@ -245,18 +234,20 @@ def CSsignalFunc(data, cosmo):
 
         # Create labels for loading of dn/dz-files:
         zbin_labels = []
-        for i in xrange(nzbins):
+        for i in range(nzbins):
             zbin_labels += ['{:.1f}t{:.1f}'.format(data.const['z_bins_min'][i], data.const['z_bins_max'][i])]
 
         pz = np.zeros((nzmax, nzbins))
         pz_norm = np.zeros(nzbins)
-        for zbin in xrange(nzbins):
+        for zbin in range(nzbins):
 
             param_name = 'D_z{:}'.format(zbin + 1)
             z_mod = z_p + data.nuisance_parameters['D_z'][param_name]
 
+
             # Load n(z) again:
-            fname = os.path.join(data.paths['data'], 'REDSHIFT_DISTRIBUTIONS/Nz_{0:}/Nz_{0:}_Mean/Nz_{0:}_z{1:}.asc'.format(data.conf['nz_method'], zbin_labels[zbin]))
+            fname = os.path.join(
+            data.paths['data'], 'redshift/' + data.conf['sample'] + '/Nz_{0:}/Nz_{0:}_Mean/Nz_{0:}_z{1:}.asc'.format(data.conf['nz_method'], zbin_labels[zbin]))
             zptemp, hist_pz = np.loadtxt(fname, usecols=(0, 1), unpack=True)
             shift_to_midpoint = np.diff(zptemp)[0] / 2.
             
@@ -280,7 +271,7 @@ def CSsignalFunc(data, cosmo):
 
 
     #####################################################################
-    # Allocation of various arrays filled and used in the function loglkl
+    # Allocation of various arrays filled and used later
     #####################################################################
     g = np.zeros((nzmax, nzbins))
     pk = np.zeros((nlmax, nzmax))
@@ -295,8 +286,6 @@ def CSsignalFunc(data, cosmo):
     xi2 = np.zeros((nthetatot, nzcorrs))
     xi1_theta = np.empty(nzcorrs, dtype=(list, 3))
     xi2_theta = np.empty(nzcorrs, dtype=(list, 3))
-    xi = np.zeros(np.size(xi_obs))
-
 
 
     ################################################
@@ -306,17 +295,17 @@ def CSsignalFunc(data, cosmo):
     # nuisance parameter for m-correction:
     dm_per_zbin = np.zeros((data.const['ntheta'], nzbins))
     if ('dm' in data.nuisance_parameters):
-        for zbin in xrange(nzbins):
+        for zbin in range(nzbins):
             dm_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dm'][zbin]
 
     # nuisance parameters for constant c-correction:
     dc1_per_zbin = np.zeros((data.const['ntheta'], nzbins))
     dc2_per_zbin = np.zeros((data.const['ntheta'], nzbins))
     if ('dc1' in data.nuisance_parameters):
-        for zbin in xrange(nzbins):
+        for zbin in range(nzbins):
             dc1_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dc1'][zbin]
     if ('dc2' in data.nuisance_parameters):
-        for zbin in xrange(nzbins):
+        for zbin in range(nzbins):
             dc2_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dc2'][zbin]
 
     # correlate dc1/2_per_zbin in tomographic order of xi1/2:
@@ -325,8 +314,8 @@ def CSsignalFunc(data, cosmo):
     # correlate dm_per_zbin in tomographic order of xi1/2:
     dm_plus_one_sqr = np.zeros((data.const['ntheta'], nzcorrs))
     index_corr = 0
-    for zbin1 in xrange(nzbins):
-        for zbin2 in xrange(zbin1, nzbins):
+    for zbin1 in range(nzbins):
+        for zbin2 in range(zbin1, nzbins):
 
             # c-correction:
             dc1_sqr[:, index_corr] = dc1_per_zbin[:, zbin1] * dc1_per_zbin[:, zbin2]
@@ -361,13 +350,13 @@ def CSsignalFunc(data, cosmo):
         print('Loaded (angular) scale-dependent c-term function from: \n', fname, '\n')
 
         amps_cfunc = np.ones(nzbins)
-        for zbin in xrange(nzbins):
+        for zbin in range(nzbins):
             if ('Ac'in data.nuisance_parameters):
                 amps_cfunc[zbin] = data.nuisance_parameters['Ac']
 
         index_corr = 0
-        for zbin1 in xrange(nzbins):
-            for zbin2 in xrange(zbin1, nzbins):
+        for zbin1 in range(nzbins):
+            for zbin2 in range(zbin1, nzbins):
                 xip_c[:, index_corr] = amps_cfunc[zbin1] * amps_cfunc[zbin2] * xip_c_per_zbin
                 # TODO: we leave xim_c set to 0 for now!
                 #xim_c[:, index_corr] = amps_cfunc[zbin1] * amps_cfunc[zbin2] * xim_c_per_zbin
@@ -422,17 +411,17 @@ def CSsignalFunc(data, cosmo):
 
     # Compute function g_i(r), that depends on r and the bin
     # g_i(r) = 2r(1+z(r)) int_r^+\infty drs p_r(rs) (rs-r)/rs
-    for Bin in xrange(nzbins):
+    for Bin in range(nzbins):
         # shift from first entry only useful if first enrty is 0!
-        for nr in xrange(1, nzmax-1):
+        for nr in range(1, nzmax-1):
             fun = pr[nr:, Bin] * (r[nr:] - r[nr]) / r[nr:]
             g[nr, Bin] = np.sum(0.5 * (fun[1:] + fun[:-1]) * (r[nr + 1:] - r[nr:-1]))
             g[nr, Bin] *= 2. * r[nr] * (1. + z_p[nr])
     
     # Get power spectrum P(k=l/r,z(r)) from cosmological module
     kmax_in_inv_Mpc = data.const['k_max_h_by_Mpc'] * small_h
-    for index_l in xrange(nlmax):
-        for index_z in xrange(1, nzmax):
+    for index_l in range(nlmax):
+        for index_z in range(1, nzmax):
 
             k_in_inv_Mpc = (l[index_l] + 0.5) / r[index_z]
             if (k_in_inv_Mpc > kmax_in_inv_Mpc):
@@ -459,10 +448,10 @@ def CSsignalFunc(data, cosmo):
     dr = r[1:] - r[:-1]
     # Start loop over l for computation of C_l^shear
     # Start loop over l for computation of E_l
-    for il in xrange(nlmax):
+    for il in range(nlmax):
         # find Cl_integrand = (g(r) / r)**2 * P(l/r,z(r))
-        for Bin1 in xrange(nzbins):
-            for Bin2 in xrange(Bin1, nzbins):
+        for Bin1 in range(nzbins):
+            for Bin2 in range(Bin1, nzbins):
                 Cl_GG_integrand[1:, one_dim_index(Bin1,Bin2, nzbins)] = g[1:, Bin1] * g[1:, Bin2] / r[1:]**2 * pk[il, 1:]
                 if intrinsic_alignment:
                     factor_IA = IAFactorFunc(small_h, Omega_m, rho_crit, \
@@ -484,7 +473,7 @@ def CSsignalFunc(data, cosmo):
         # It is then multiplied by 9/16*Omega_m**2
         # and then by (h/2997.9)**4 to be dimensionless
         # (since P(k)*dr is in units of Mpc**4)
-        for Bin in xrange(nzcorrs):
+        for Bin in range(nzcorrs):
             Cl_GG[il, Bin] = np.sum(0.5 * (Cl_GG_integrand[1:, Bin] + Cl_GG_integrand[:-1, Bin]) * dr)
             Cl_GG[il, Bin] *= 9. / 16. * Omega_m**2
             Cl_GG[il, Bin] *= (small_h / 2997.9)**4
@@ -503,11 +492,11 @@ def CSsignalFunc(data, cosmo):
         Cl = Cl_GG
 
     # Spline Cl[il,Bin1,Bin2] along l
-    for Bin in xrange(nzcorrs):
+    for Bin in range(nzcorrs):
         spline_Cl[Bin] = list(itp.splrep(l, Cl[:, Bin]))
 
     # Interpolate Cl at values lll and store results in Cll
-    for Bin in xrange(nzcorrs):
+    for Bin in range(nzcorrs):
         Cll[Bin,:] = itp.splev(lll[:], spline_Cl[Bin])
 
     if data.conf['integrate_Bessel_with'] == 'brute_force':
@@ -516,14 +505,14 @@ def CSsignalFunc(data, cosmo):
         # functions over some predefined multipole range...
         #t0 = timer()
         # Start loop over theta values
-        for it in xrange(nthetatot):
+        for it in range(nthetatot):
             BBessel0[:] = special.j0(lll[:] * theta[it] * a2r)
             BBessel4[:] = special.jv(4, lll[:] * theta[it] * a2r)
 
             # Here is the actual trapezoidal integral giving the xi's:
             # - in more explicit style:
-            # for Bin in xrange(nzbin_pairs):
-            #     for il in xrange(ilmax):
+            # for Bin in range(nzbin_pairs):
+            #     for il in range(ilmax):
             #         xi1[it, Bin] = np.sum(ldl[il]*Cll[Bin,il]*BBessel0[il])
             #         xi2[it, Bin] = np.sum(ldl[il]*Cll[Bin,il]*BBessel4[il])
             # - in more compact and vectorizable style:
@@ -540,7 +529,7 @@ def CSsignalFunc(data, cosmo):
 
     elif data.conf['integrate_Bessel_with'] == 'fftlog':
         #t0 = timer()
-        for zcorr in xrange(nzcorrs):
+        for zcorr in range(nzcorrs):
 
             # convert theta from arcmin to deg; xis are already normalized!
             xi1[:, zcorr] = Cl2xi(Cll[zcorr, :], lll[:], theta[:] / 60., bessel_order=0) #, ell_min_fftlog=lll.min(), ell_max_fftlog=lll.max() + 1e4)
@@ -552,7 +541,7 @@ def CSsignalFunc(data, cosmo):
 
     else:
         #t0 = timer()
-        for it in xrange(nthetatot):
+        for it in range(nthetatot):
             ilmax = il_max[it]
 
             BBessel0[:ilmax] = special.j0(lll[:ilmax] * theta[it] * a2r)
@@ -560,8 +549,8 @@ def CSsignalFunc(data, cosmo):
 
             # Here is the actual trapezoidal integral giving the xi's:
             # - in more explicit style:
-            # for Bin in xrange(nzcorrs):
-            #     for il in xrange(ilmax):
+            # for Bin in range(nzcorrs):
+            #     for il in range(ilmax):
             #         xi1[it, Bin] = np.sum(ldl[il]*Cll[Bin,il]*BBessel0[il])
             #         xi2[it, Bin] = np.sum(ldl[il]*Cll[Bin,il]*BBessel4[il])
             # - in more compact and vectorizable style:
@@ -577,7 +566,7 @@ def CSsignalFunc(data, cosmo):
         xi2 = xi2 / (2. * math.pi)
 
     # Spline the xi's
-    for Bin in xrange(nzcorrs):
+    for Bin in range(nzcorrs):
 
         xi1_theta[Bin] = list(itp.splrep(theta, xi1[:,Bin]))
         xi2_theta[Bin] = list(itp.splrep(theta, xi2[:,Bin]))
@@ -588,11 +577,11 @@ def CSsignalFunc(data, cosmo):
 
         #t0 = timer()
         # roughly 0.01s to 0.02s extra...
-        for idx_theta in xrange(data.const['ntheta']):
+        for idx_theta in range(data.const['ntheta']):
             theta = thetas_for_theory_binning[idx_theta, :]
             dtheta = (theta[1:] - theta[:-1]) * a2r
 
-            for idx_bin in xrange(nzcorrs):
+            for idx_bin in range(nzcorrs):
 
                 xi_p_integrand = itp.splev(theta, xi1_theta[idx_bin]) * itp.splev(theta, theory_weight_func)
                 xi_m_integrand = itp.splev(theta, xi2_theta[idx_bin]) * itp.splev(theta, theory_weight_func)
@@ -609,9 +598,9 @@ def CSsignalFunc(data, cosmo):
     else:
         # Get xi's in same column vector format as the data
         #iz = 0
-        #for Bin in xrange(nzcorrs):
+        #for Bin in range(nzcorrs):
         #    iz = iz + 1  # this counts the bin combinations
-        #    for i in xrange(ntheta):
+        #    for i in range(ntheta):
         #        j = (iz-1)*2*ntheta
         #        xi[j+i] = itp.splev(
         #            theta_bins[i], xi1_theta[Bin])
@@ -619,7 +608,7 @@ def CSsignalFunc(data, cosmo):
         #            theta_bins[i], xi2_theta[Bin])
         # or in more compact/vectorizable form:
         iz = 0
-        for Bin in xrange(nzcorrs):
+        for Bin in range(nzcorrs):
             iz = iz + 1  # this counts the bin combinations
             j = (iz - 1) * 2 * ntheta
             xi[j:j + data.const['ntheta']] = itp.splev(theta_bins[:data.const['ntheta']], xi1_theta[Bin])
@@ -637,7 +626,7 @@ def CSsignalFunc(data, cosmo):
     xi = xi * dm_plus_one_sqr_obs + xipm_c + dc_sqr
 
     # write out masked theory vector in list format:    
-    io_cs.WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, xi, data.conf['prefix_theory'])
+    io_cs.WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, xi, data.conf['sample'])
     print('Predicted vector saved.')
     print('All Done.')
 
@@ -654,8 +643,8 @@ def OrderXiFunc(temp, ntheta, nzcorrs):
 
         # create the data-vector:
         k = 0
-        for j in xrange(nzcorrs):
-            for i in xrange(2 * ntheta):
+        for j in range(nzcorrs):
+            for i in range(2 * ntheta):
                 xi_obs[k] = temp[i, j]
                 k += 1
 
