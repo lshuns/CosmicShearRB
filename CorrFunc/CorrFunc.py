@@ -15,11 +15,11 @@ CorrFunc:
     e is modified using weighted e 
     bin_slop is set to be 0.05
 
-CorrPlotFunc:
-    Rearrange the results to be used in plot.
-
 CorrCosmoFunc:
     Rearrange the results to be used in cosmo analysis.
+
+CorrPlotFunc:
+    Rearrange the results to be used in plot.
 
 """
 
@@ -82,9 +82,62 @@ def CorrFunc(cat1, cat2,
     print("TreeCorr results saved in", outpath)
 
 
-def CorrPlotFunc(Nbins=None, 
+def CorrCosmoFunc(Nbins=None, ntheta=None,
                         inpathF=None, inpathP=None, 
                         m_list=[],
+                        outpathF=None, outpathP=None):
+    """
+    Rearrange the results to be used in cosmo analysis
+    """
+
+
+    header = ' theta(arcmin)   xi_p    xi_m'
+
+    # the slightly different of theta on different tomographic bins 
+    # is smeared using average
+    npairs = int(Nbins * (Nbins + 1) / 2)
+    thetas = np.zeros((ntheta, npairs))
+    index_corr = 0
+    for idx_z1 in range(Nbins):
+        for idx_z2 in range(idx_z1, Nbins):
+
+            inpath = inpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + inpathP
+            dat = np.loadtxt(inpath)
+
+            thetas[:, index_corr] = dat[:,1]
+            index_corr += 1
+    theta = thetas.mean(axis=1)
+
+    for idx_z1 in range(Nbins):
+        for idx_z2 in range(idx_z1, Nbins):
+
+            inpath = inpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + inpathP
+            dat = np.loadtxt(inpath)
+
+            # xi_p
+            xi_p = dat[:,3]
+            # xi_m
+            xi_m = dat[:,4]
+
+            if m_list != []:                
+                Kplus1 = (1. + m_list[idx_z1]) * (1 + m_list[idx_z2]) 
+        
+                xi_p = xi_p / Kplus1
+                xi_m = xi_m / Kplus1
+
+                outpath = outpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + '_withK' + outpathP
+            else:
+                outpath = outpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + '_withoutK' + outpathP
+
+            savedata = np.column_stack((theta, xi_p, xi_m))
+            np.savetxt(outpath, savedata, header=header, delimiter='\t', fmt=['%.5e', '%.5e', '%.5e'])
+    
+            print("TreeCorr Results rearranged for cosmo analysis saved to", outpath)
+
+
+def CorrPlotFunc(Nbins=None, 
+                        inpathF=None, inpathP=None, 
+                        withK=True,
                         outpath=None):
     """
     Rearrange the results to be used in plot
@@ -100,18 +153,18 @@ def CorrPlotFunc(Nbins=None,
     for idx_z1 in range(Nbins):
         for idx_z2 in range(idx_z1, Nbins):
 
-            inpath = inpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + inpathP
+            if withK:
+                inpath = inpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + '_withK' + inpathP
+            else:
+                inpath = inpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + '_withoutK' + inpathP
+            
             dat = np.loadtxt(inpath)
 
             # theta
-            theta_bins = np.concatenate((dat[0:7,1],dat[-6:,1]))
+            theta_bins = np.concatenate((dat[0:7,0],dat[-6:,0]))
             thetas.append(theta_bins)
             # xi_pm
-            xi_pm_bins = np.concatenate((dat[0:7,3], dat[-6:,4]))
-            if m_list != []:
-                Kplus1 = (1. + m_list[idx_z1]) * (1 + m_list[idx_z2]) 
-        
-                xi_pm_bins = xi_pm_bins / Kplus1
+            xi_pm_bins = np.concatenate((dat[0:7,1], dat[-6:,2]))
 
             xi_pm.append(xi_pm_bins)
             # idx_pm
@@ -132,43 +185,4 @@ def CorrPlotFunc(Nbins=None,
     header = ' i    theta(i)\'        xi_p/m(i)  (p=1, m=2)  itomo   jtomo'
     np.savetxt(outpath, savedata, header=header, delimiter='\t', fmt=['%4i', '%.5e', '%12.5e', '%i', '%i', '%i'])
     
-
     print("TreeCorr Results rearranged for plot saved to", outpath)
-
-
-def CorrCosmoFunc(Nbins=None, 
-                        inpathF=None, inpathP=None, 
-                        m_list=[],
-                        outpathF=None, outpathP=None):
-    """
-    Rearrange the results to be used in cosmo analysis
-    """
-
-    header = ' theta(arcmin)   xi_p    xi_m'
-
-    for idx_z1 in range(Nbins):
-        for idx_z2 in range(idx_z1, Nbins):
-
-            inpath = inpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + inpathP
-            dat = np.loadtxt(inpath)
-
-            # theta
-            theta = dat[:,1]
-            # xi_p
-            xi_p = dat[:,3]
-            xi_m = dat[:,4]
-
-            if m_list != []:                
-                Kplus1 = (1. + m_list[idx_z1]) * (1 + m_list[idx_z2]) 
-        
-                xi_p = xi_p / Kplus1
-                xi_m = xi_m / Kplus1
-
-                outpath = outpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + '_withK' + outpathP
-            else:
-                outpath = outpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + '_withoutK' + outpathP
-
-            savedata = np.column_stack((theta, xi_p, xi_m))
-            np.savetxt(outpath, savedata, header=header, delimiter='\t', fmt=['%.5e', '%.5e', '%.5e'])
-    
-            print("TreeCorr Results rearranged for cosmo analysis saved to", outpath)
