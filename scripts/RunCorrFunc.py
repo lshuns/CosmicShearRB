@@ -181,28 +181,27 @@ for i in range(len(Reoutpaths_plot_withoutK)):
 
     outpathP = outpathPs[i]
 
-    CorrPlotFunc(Nbins=nzbins, 
-                        inpathF=outpathF, inpathP=outpathP, 
-                        m_list=[], 
-                        outpath=Reoutpath_plot_withoutK)
-    
-    CorrPlotFunc(Nbins=nzbins, 
-                        inpathF=outpathF, inpathP=outpathP, 
-                        m_list=ms, 
-                        outpath=Reoutpath_plot_withK)
-
-
-
     ReoutpathF_cosmo = ReoutpathFs_cosmo[i]
     ReoutpathP_cosmo = ReoutpathPs_cosmo[i]
     
-    CorrCosmoFunc(Nbins=nzbins, 
+    CorrCosmoFunc(Nbins=nzbins, ntheta=theta_nbins,
                         inpathF=outpathF, inpathP=outpathP, 
                         m_list=[],
                         outpathF=ReoutpathF_cosmo, outpathP=ReoutpathP_cosmo)
-    CorrCosmoFunc(Nbins=nzbins, 
+    CorrCosmoFunc(Nbins=nzbins, ntheta=theta_nbins,
                         inpathF=outpathF, inpathP=outpathP, 
                         m_list=ms,
                         outpathF=ReoutpathF_cosmo, outpathP=ReoutpathP_cosmo)
+
+    CorrPlotFunc(Nbins=nzbins, 
+                        inpathF=ReoutpathF_cosmo, inpathP=ReoutpathP_cosmo, 
+                        withK=False,
+                        outpath=Reoutpath_plot_withoutK)
+
+    CorrPlotFunc(Nbins=nzbins, 
+                        inpathF=ReoutpathF_cosmo, inpathP=ReoutpathP_cosmo, 
+                        withK=True,
+                        outpath=Reoutpath_plot_withK)
+
 
 print("All finished in", time.time()-Start)
