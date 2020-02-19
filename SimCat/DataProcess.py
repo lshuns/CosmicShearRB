@@ -52,11 +52,11 @@ def SelecFunc(inpath, outpath, logpath=None):
     # selection
     # lensfit cuts with 0 means no issue and -9 means large galaxies
     fitcuts = ((df.fitclass==0) | (df.fitclass==-9))
-    # remove stars
-    star_cuts = (df.size_in>0)
+    # # remove stars
+    # star_cuts = (df.size_in>0)
     # remove invalid measurements
     weight_cuts = (df.LFweight>0)
-    valid_measurement = (df.size_out>0)
+    # valid_measurement = (df.size_out>0)
     # remove potentially blended sources
     blend_cuts = (df.contamination_radius>4.25)
     # required for meaningful T_B value
@@ -65,10 +65,10 @@ def SelecFunc(inpath, outpath, logpath=None):
     binary_star_cuts = ((np.hypot(df.e1, df.e2)<=0.8) | (df.size_out>=0.5*np.exp(0.65788*(24.2-df.mag_out))))
     # remove tiny sources
     tiny_cuts = (df.size_out-df.size_corr>0.5)
-    # some random cut to the maximum snr
-    snr_cuts = (df.snr_model<210)
+    # # some random cut to the maximum snr
+    # snr_cuts = (df.snr_model<210)
     #
-    df_select = df[fitcuts & star_cuts & weight_cuts & valid_measurement & blend_cuts & TB_cuts & binary_star_cuts & tiny_cuts & snr_cuts]
+    df_select = df[fitcuts & weight_cuts & blend_cuts & TB_cuts & binary_star_cuts & tiny_cuts]
     
     # save data
     df_select = df_select.reset_index(drop=True)

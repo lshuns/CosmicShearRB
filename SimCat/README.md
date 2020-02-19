@@ -1,4 +1,4 @@
-Scripts to deal with the simulated catalogue. The simulated catalogue is available by request.
+Scripts to deal with the simulated catalogue. The simulated catalogue is available on request.
 
 Columns in simulated catalogues:
 
