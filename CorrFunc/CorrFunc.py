@@ -18,8 +18,14 @@ CorrFunc:
 CorrCosmoFunc:
     Rearrange the results to be used in cosmo analysis.
 
+CorrErrCosmoFunc:
+    Save treecorr reported errors.
+
 CorrPlotFunc:
     Rearrange the results to be used in plot.
+
+CorrErrPlotFunc:
+    Rearrange the errors to be used in plot.
 
 """
 
@@ -135,6 +141,51 @@ def CorrCosmoFunc(Nbins=None, ntheta=None,
             print("TreeCorr Results rearranged for cosmo analysis saved to", outpath)
 
 
+
+def CorrErrCosmoFunc(Nbins=None, ntheta=None,
+                        inpathF=None, inpathP=None, 
+                        outpathF=None, outpathP=None):
+    """
+    Save the treecorr reported errors to be used in cosmo analysis
+    """
+
+
+    header = ' theta(arcmin)   xi_p_err    xi_m_err'
+
+    # the slightly different of theta on different tomographic bins 
+    # is smeared using average
+    npairs = int(Nbins * (Nbins + 1) / 2)
+    thetas = np.zeros((ntheta, npairs))
+    index_corr = 0
+    for idx_z1 in range(Nbins):
+        for idx_z2 in range(idx_z1, Nbins):
+
+            inpath = inpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + inpathP
+            dat = np.loadtxt(inpath)
+
+            thetas[:, index_corr] = dat[:,1]
+            index_corr += 1
+    theta = thetas.mean(axis=1)
+
+    for idx_z1 in range(Nbins):
+        for idx_z2 in range(idx_z1, Nbins):
+
+            inpath = inpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + inpathP
+            dat = np.loadtxt(inpath)
+
+            # xi_p_err
+            xi_p_err = dat[:,7]
+            # xi_m_err
+            xi_m_err = dat[:,8]
+
+            outpath = outpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + '_error' + outpathP
+
+            savedata = np.column_stack((theta, xi_p_err, xi_m_err))
+            np.savetxt(outpath, savedata, header=header, delimiter='\t', fmt=['%.5e', '%.5e', '%.5e'])
+    
+            print("Errors from treecorr results saved to", outpath)
+
+
 def CorrPlotFunc(Nbins=None, 
                         inpathF=None, inpathP=None, 
                         withK=True,
@@ -186,3 +237,55 @@ def CorrPlotFunc(Nbins=None,
     np.savetxt(outpath, savedata, header=header, delimiter='\t', fmt=['%4i', '%.5e', '%12.5e', '%i', '%i', '%i'])
     
     print("TreeCorr Results rearranged for plot saved to", outpath)
+
+
+def CorrErrPlotFunc(Nbins=None, 
+                        inpathF=None, inpathP=None, 
+                        outpath=None):
+    """
+    Rearrange the errors to be used in plot
+    """
+
+    # Initialise all output colunms
+    thetas = []
+    xi_pm_err = []
+    idx_pm = []
+    idx_tomo_z1 = []
+    idx_tomo_z2 = []
+
+    for idx_z1 in range(Nbins):
+        for idx_z2 in range(idx_z1, Nbins):
+
+            inpath = inpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + '_error' + inpathP
+
+            dat = np.loadtxt(inpath)
+
+            # theta
+            theta_bins = np.concatenate((dat[0:7,0],dat[-6:,0]))
+            thetas.append(theta_bins)
+            # xi_pm_err
+            xi_pm_err_bins = np.concatenate((dat[0:7,1], dat[-6:,2]))
+
+            xi_pm_err.append(xi_pm_err_bins)
+            # idx_pm
+            idx_pm_bins = np.concatenate((np.ones(7), np.ones(6) + 1))
+            idx_pm.append(idx_pm_bins)
+            # idx_tomo
+            idx_tomo_z1.append(np.ones(7+6)*(idx_z1+1))
+            idx_tomo_z2.append(np.ones(7+6)*(idx_z2+1))
+
+    thetas = np.concatenate(thetas)
+    xi_pm_err = np.concatenate(xi_pm_err)
+    idx_pm = np.concatenate(idx_pm)
+    idx_tomo_z1 = np.concatenate(idx_tomo_z1)
+    idx_tomo_z2 = np.concatenate(idx_tomo_z2)
+
+    idx_run = np.arange(len(idx_pm)) + 1
+    savedata = np.column_stack((idx_run, thetas, xi_pm_err, idx_pm, idx_tomo_z1, idx_tomo_z2))
+    header = ' i    theta(i)\'        xi_err_p/m(i)  (p=1, m=2)  itomo   jtomo'
+    np.savetxt(outpath, savedata, header=header, delimiter='\t', fmt=['%4i', '%.5e', '%12.5e', '%i', '%i', '%i'])
+    
+    print("Errors rearranged for plot saved to", outpath)
+
+
+

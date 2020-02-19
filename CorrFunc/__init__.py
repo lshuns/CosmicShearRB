@@ -15,12 +15,18 @@ CorrFunc:
     e is modified using weighted e 
     bin_slop is set to be 0.05
 
-CorrPlotFunc:
-    Rearrange the results to be used in plot.
-
 CorrCosmoFunc:
     Rearrange the results to be used in cosmo analysis.
 
+CorrErrCosmoFunc:
+    Save treecorr reported errors.
+
+CorrPlotFunc:
+    Rearrange the results to be used in plot.
+
+CorrErrPlotFunc:
+    Rearrange the errors to be used in plot.
+
 """
 
-from CorrFunc.CorrFunc import MeanFunc, CorrFunc, CorrPlotFunc, CorrCosmoFunc
+from CorrFunc.CorrFunc import MeanFunc, CorrFunc, CorrPlotFunc, CorrCosmoFunc, CorrErrCosmoFunc, CorrErrPlotFunc

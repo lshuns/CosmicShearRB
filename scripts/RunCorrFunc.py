@@ -22,7 +22,7 @@ import os
 import sys
 # Self-defined package
 sys.path.insert(0,os.path.realpath('..')) 
-from CorrFunc import MeanFunc, CorrFunc, CorrCosmoFunc, CorrPlotFunc
+from CorrFunc import MeanFunc, CorrFunc, CorrPlotFunc, CorrCosmoFunc, CorrErrCosmoFunc, CorrErrPlotFunc
 
 
 Start = time.time()
@@ -72,6 +72,13 @@ outpathPs =['_whole.dat', \
             '_blue.dat']
 
 # rearrange catalogue path
+#
+ReoutpathFs_cosmo = ["/disks/shear15/ssli/CosmicShear/data_vector/for_cosmo/xi_for_cosmo_", \
+                        "/disks/shear15/ssli/CosmicShear/data_vector/for_cosmo/xi_for_cosmo_", \
+                        "/disks/shear15/ssli/CosmicShear/data_vector/for_cosmo/xi_for_cosmo_"]
+#
+ReoutpathPs_cosmo = ["_whole.dat", "_red.dat", "_blue.dat"]
+#
 Reoutpaths_plot_withoutK = ["/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withoutK_whole.dat", \
                         "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withoutK_red.dat", \
                         "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withoutK_blue.dat"]
@@ -80,21 +87,19 @@ Reoutpaths_plot_withK = ["/disks/shear15/ssli/CosmicShear/data_vector/for_plot/x
                     "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withK_red.dat", \
                     "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withK_blue.dat"]
 #
-ReoutpathFs_cosmo = ["/disks/shear15/ssli/CosmicShear/data_vector/for_cosmo/xi_for_cosmo_", \
-                        "/disks/shear15/ssli/CosmicShear/data_vector/for_cosmo/xi_for_cosmo_", \
-                        "/disks/shear15/ssli/CosmicShear/data_vector/for_cosmo/xi_for_cosmo_"]
-#
-ReoutpathPs_cosmo = ["_whole.dat", "_red.dat", "_blue.dat"]
+Reoutpaths_plot_err = ["/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_error_whole.dat", \
+                    "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_error_red.dat", \
+                    "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_error_blue.dat"]
 
 
-# c-term
-log_cW = open("/disks/shear15/ssli/CosmicShear/shear_bias/e_vs_ZB_whole.csv", 'w')
-print("patch,bin,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log_cW)
-log_cR = open("/disks/shear15/ssli/CosmicShear/shear_bias/e_vs_ZB_red.csv", 'w')
-print("patch,bin,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log_cR)
-log_cB = open("/disks/shear15/ssli/CosmicShear/shear_bias/e_vs_ZB_blue.csv", 'w')
-print("patch,bin,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log_cB)
-log_cs = [log_cW, log_cR, log_cB]
+# # c-term
+# log_cW = open("/disks/shear15/ssli/CosmicShear/shear_bias/e_vs_ZB_whole.csv", 'w')
+# print("patch,bin,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log_cW)
+# log_cR = open("/disks/shear15/ssli/CosmicShear/shear_bias/e_vs_ZB_red.csv", 'w')
+# print("patch,bin,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log_cR)
+# log_cB = open("/disks/shear15/ssli/CosmicShear/shear_bias/e_vs_ZB_blue.csv", 'w')
+# print("patch,bin,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log_cB)
+# log_cs = [log_cW, log_cR, log_cB]
 
 
 # jobs = []
@@ -174,8 +179,6 @@ log_cs = [log_cW, log_cR, log_cB]
 print("Start rearrange the results...")
 
 for i in range(len(Reoutpaths_plot_withoutK)):
-    Reoutpath_plot_withK = Reoutpaths_plot_withK[i]
-    Reoutpath_plot_withoutK = Reoutpaths_plot_withoutK[i]
 
     ms = mss[i]
 
@@ -183,6 +186,10 @@ for i in range(len(Reoutpaths_plot_withoutK)):
 
     ReoutpathF_cosmo = ReoutpathFs_cosmo[i]
     ReoutpathP_cosmo = ReoutpathPs_cosmo[i]
+
+    Reoutpath_plot_withK = Reoutpaths_plot_withK[i]
+    Reoutpath_plot_withoutK = Reoutpaths_plot_withoutK[i]
+    Reoutpath_plot_err = Reoutpaths_plot_err[i]
     
     CorrCosmoFunc(Nbins=nzbins, ntheta=theta_nbins,
                         inpathF=outpathF, inpathP=outpathP, 
@@ -191,6 +198,10 @@ for i in range(len(Reoutpaths_plot_withoutK)):
     CorrCosmoFunc(Nbins=nzbins, ntheta=theta_nbins,
                         inpathF=outpathF, inpathP=outpathP, 
                         m_list=ms,
+                        outpathF=ReoutpathF_cosmo, outpathP=ReoutpathP_cosmo)
+
+    CorrErrCosmoFunc(Nbins=nzbins, ntheta=theta_nbins,
+                        inpathF=outpathF, inpathP=outpathP, 
                         outpathF=ReoutpathF_cosmo, outpathP=ReoutpathP_cosmo)
 
     CorrPlotFunc(Nbins=nzbins, 
@@ -202,6 +213,11 @@ for i in range(len(Reoutpaths_plot_withoutK)):
                         inpathF=ReoutpathF_cosmo, inpathP=ReoutpathP_cosmo, 
                         withK=True,
                         outpath=Reoutpath_plot_withK)
+
+    CorrErrPlotFunc(Nbins=nzbins, 
+                        inpathF=ReoutpathF_cosmo, inpathP=ReoutpathP_cosmo, 
+                        outpath=Reoutpath_plot_err)
+
 
 
 print("All finished in", time.time()-Start)
