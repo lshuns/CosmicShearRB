@@ -5,7 +5,7 @@ __pycache__/
 *.so
 *.a
 
-test*
+*test*
 improvement.txt
 
 output/
