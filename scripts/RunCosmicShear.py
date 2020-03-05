@@ -67,7 +67,7 @@ data.read_file(name_conf_file, 'data', field='', separate=False)
 CosmicShear.CSsignalFunc(data, cosmo)
 
 
-# ++++++++++++++++++++++++++++++++++++++++++ whole
+# ++++++++++++++++++++++++++++++++++++++++++ blue
 # name of parameter/configure files
 name_param_file = 'kv450_cf_best_blue.param'
 name_conf_file = 'kv450_cf_blue.conf'

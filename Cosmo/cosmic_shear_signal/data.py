@@ -20,27 +20,20 @@ class Data(object):
 
     def __init__(self, paths):
         """
-        The Data class holds the cosmological information, the parameters from
-        the input, the information coming from the cosmic_shear. It is a wide
-        collections of information, with in particular two main dictionaries:
-        cosmo_arguments and other_parameters.
+        The Data class is a collection of all the necessary information. 
 
-        It defines several useful **methods**. The following ones are called
-        just once, at initialization:
+        It defines one useful **methods** which is called
+        just once at beginning:
 
-        It has a number of different **attributes**, and the more important
-        ones are listed here:
+        * :func:`read_file`
 
+        It has a number of different **attributes**, where contain all the input:
+
+        # :attr:`paths`
         * :attr:`cosmo_arguments`
-        * :attr:`other_parameters`
-
-
-        .. note::
-
-            The path argument will be used in case it is a first run, and hence
-            a new folder is created. If starting from an existing folder, this
-            dictionary will be compared with the one extracted from the
-            log.param, and will use the latter while warning the user.
+        * :attr:`nuisance_parameters`
+        * :attr:`const`
+        * :attr:`conf`
 
         To create an instance of this class, one must feed the following
         parameters and keyword arguments:
@@ -55,7 +48,6 @@ class Data(object):
         self.paths = paths
 
 
-        # Creation of the two main dictionnaries:
         self.cosmo_arguments = {}
         """
         Simple dictionary that will serve as a communication interface with the
@@ -64,12 +56,11 @@ class Data(object):
 
         :rtype:   dict
         """
+
         self.nuisance_parameters = {}
         """
-        Ordered dictionary of dictionaries, it contains all nuisance paramters
-        needed by cosmic shear prediction. Every parameter name will be 
-        the key of a dictionary.
-
+        Nuisance paramters needed by cosmic shear prediction.
+        
         :rtype: dict
         """
 

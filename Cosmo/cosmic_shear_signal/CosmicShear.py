@@ -6,6 +6,10 @@ Created on Wed Feb  5 12:59:24 2020
 @author: ssli
 
 Predict theoretical cosmic shear signal with input cosmological parameters
+
+Modified from Likelihood for the KiDS+VIKING-450 correlation functions 
+    https://github.com/fkoehlin/kv450_cf_likelihood_public
+
 """
 
 from __future__ import print_function
@@ -29,7 +33,10 @@ def CSsignalFunc(data, cosmo):
     # Number of correlation
     nzcorrs = int(nzbins * (nzbins + 1) / 2)
 
+
+    #####################################################################
     # read in data vector
+    #####################################################################
     # the theta list is the one actually used
     path_tmp = os.path.join(data.paths['data'], 'data_vector/for_cosmo/' + data.conf['prefix_data_vector'] + data.conf['sample'] + '.dat')
     theta, _, _ = np.loadtxt(path_tmp, unpack=True)
@@ -45,17 +52,11 @@ def CSsignalFunc(data, cosmo):
         mask_indices = np.where(mask == 1)[0]
         mask_suffix = data.conf['cutvalues_file'][:-4]
 
-        
-    # This is for Cl-integration only!
-    # Define array of l values, and initialize them
-    # It is a logspace
-    # find nlmax in order to reach lmax with logarithmic steps dlnl
-    nlmax = np.int(np.log(data.const['lmax']) / data.const['dlnl']) + 1
-    # redefine slightly dlnl so that the last point is always exactly lmax
-    dlnl = np.log(data.const['lmax']) / (nlmax - 1)
-    l = np.exp(dlnl * np.arange(nlmax))
 
+
+    #####################################################################
     # read redshift distribution
+    #####################################################################
     z_samples, hist_samples, nz_samples = io_cs.ReadZdistribution(data, nzbins)
 
     # prevent undersampling of histograms!
@@ -90,23 +91,60 @@ def CSsignalFunc(data, cosmo):
         dz = z_p[1:] - z_p[:-1]
         pz_norm[zbin] = np.sum(0.5 * (pz[1:, zbin] + pz[:-1, zbin]) * dz)
 
+    if ('D_z' in data.nuisance_parameters):
+
+        # Create labels for loading of dn/dz-files:
+        zbin_labels = []
+        for i in range(nzbins):
+            zbin_labels += ['{:.1f}t{:.1f}'.format(data.const['z_bins_min'][i], data.const['z_bins_max'][i])]
+
+        pz = np.zeros((nzmax, nzbins))
+        pz_norm = np.zeros(nzbins)
+        for zbin in range(nzbins):
+
+            param_name = 'D_z{:}'.format(zbin + 1)
+            z_mod = z_p + data.nuisance_parameters['D_z'][param_name]
+
+            # Load n(z) again:
+            fname = os.path.join(
+            data.paths['data'], 'redshift/' + data.conf['sample'] + '/Nz_{0:}/Nz_{0:}_Mean/Nz_{0:}_z{1:}.asc'.format(data.conf['nz_method'], zbin_labels[zbin]))
+            zptemp, hist_pz = np.loadtxt(fname, usecols=(0, 1), unpack=True)
+            shift_to_midpoint = np.diff(zptemp)[0] / 2.
+            
+            spline_pz = itp.interp1d(zptemp + shift_to_midpoint, hist_pz, kind=data.conf['type_redshift_interp'])
+            
+            mask_min = z_mod >= zptemp.min() + shift_to_midpoint
+            mask_max = z_mod <= zptemp.max() + shift_to_midpoint
+            mask_tmp = mask_min & mask_max
+            # points outside the z-range of the histograms are set to 0!
+            pz[mask_tmp, zbin] = spline_pz(z_mod[mask_tmp])
+            # Normalize selection functions
+            dz = z_p[1:] - z_p[:-1]
+            pz_norm[zbin] = np.sum(0.5 * (pz[1:, zbin] + pz[:-1, zbin]) * dz)
+
+
+    #####################################################################
+    # CLASS cosmo initialization
+    #####################################################################
     # the last cosmo arguments  
     data.cosmo_arguments['z_max_pk'] = z_p.max()
+    print('Intitial cosmological parameters passed to CLASS code:')
     print(data.cosmo_arguments)
 
     # Prepare the cosmological module with the input parameters
     cosmo.set(data.cosmo_arguments)
     cosmo.compute(["lensing"])
-    print('Omega_m', cosmo.Omega_m())
-    print('h', cosmo.h())
-    print('sigma8', cosmo.sigma8())
+    print('sigma8 =', cosmo.sigma8())
 
     # Omega_m contains all species!
     Omega_m = cosmo.Omega_m()
+    print('Omega_m =', Omega_m)
     small_h = cosmo.h()
+    print('h =', small_h)
     # One wants to obtain here the relation between z and r, this is done
     # by asking the cosmological module with the function z_of_r
     r, dzdr = cosmo.z_of_r(z_p)
+
 
     ################################################
     # discrete theta values (to convert C_l to xi's)
@@ -128,11 +166,19 @@ def CSsignalFunc(data, cosmo):
         theta[it] = thetamin * math.exp(data.const['dlntheta'] * it)
 
 
-    if data.conf['integrate_Bessel_with'] in ['brute_force', 'cut_off']:
-        ################################################################
-        # discrete l values used in the integral to convert C_l to xi's)
-        ################################################################
 
+    ################################################################
+    # discrete l values used in the integral to convert C_l to xi's)
+    ################################################################
+    # wavenumber l for Cl-integration
+    # It is a logspace
+    # find nlmax in order to reach lmax with logarithmic steps dlnl
+    nlmax = np.int(np.log(data.const['lmax']) / data.const['dlnl']) + 1
+    # redefine slightly dlnl so that the last point is always exactly lmax
+    dlnl = np.log(data.const['lmax']) / (nlmax - 1)
+    l = np.exp(dlnl * np.arange(nlmax))
+
+    if data.conf['integrate_Bessel_with'] in ['brute_force', 'cut_off']:
         # l = x / theta / a2r
         # x = l * theta * a2r
 
@@ -196,7 +242,10 @@ def CSsignalFunc(data, cosmo):
         #lll = np.arange(1., lmax + 1., 1)
         nl = lll.size
 
-    # here we set up arrays and some integrations necessary for the theory binning:
+
+    #####################################################################
+    # arrays and some integrations necessary for the theory binning:
+    #####################################################################
     if data.conf['use_theory_binning']:
         if data.conf['read_weight_func_for_binning']:
             fname = os.path.join(data.paths['data'], data.conf['theory_weight_func_file'])
@@ -226,50 +275,6 @@ def CSsignalFunc(data, cosmo):
             thetas_for_theory_binning[idx_theta, :] = theta_tmp
 
 
-    # Compute now the selection function p(r) = p(z) dz/dr normalized
-    # to one. The np.newaxis helps to broadcast the one-dimensional array
-    # dzdr to the proper shape. Note that p_norm is also broadcasted as
-    # an array of the same shape as p_z
-    if ('D_z' in data.nuisance_parameters):
-
-        # Create labels for loading of dn/dz-files:
-        zbin_labels = []
-        for i in range(nzbins):
-            zbin_labels += ['{:.1f}t{:.1f}'.format(data.const['z_bins_min'][i], data.const['z_bins_max'][i])]
-
-        pz = np.zeros((nzmax, nzbins))
-        pz_norm = np.zeros(nzbins)
-        for zbin in range(nzbins):
-
-            param_name = 'D_z{:}'.format(zbin + 1)
-            z_mod = z_p + data.nuisance_parameters['D_z'][param_name]
-
-
-            # Load n(z) again:
-            fname = os.path.join(
-            data.paths['data'], 'redshift/' + data.conf['sample'] + '/Nz_{0:}/Nz_{0:}_Mean/Nz_{0:}_z{1:}.asc'.format(data.conf['nz_method'], zbin_labels[zbin]))
-            zptemp, hist_pz = np.loadtxt(fname, usecols=(0, 1), unpack=True)
-            shift_to_midpoint = np.diff(zptemp)[0] / 2.
-            
-            spline_pz = itp.interp1d(zptemp + shift_to_midpoint, hist_pz, kind=data.conf['type_redshift_interp'])
-            
-            mask_min = z_mod >= zptemp.min() + shift_to_midpoint
-            mask_max = z_mod <= zptemp.max() + shift_to_midpoint
-            mask_tmp = mask_min & mask_max
-            # points outside the z-range of the histograms are set to 0!
-            pz[mask_tmp, zbin] = spline_pz(z_mod[mask_tmp])
-            # Normalize selection functions
-            dz = z_p[1:] - z_p[:-1]
-            pz_norm[zbin] = np.sum(0.5 * (pz[1:, zbin] + pz[:-1, zbin]) * dz)
-
-        pr = pz * (dzdr[:, np.newaxis] / pz_norm)
-
-    else:
-        # use fiducial dn/dz loaded before
-        pr = pz * (dzdr[:, np.newaxis] / pz_norm)
-
-
-
     #####################################################################
     # Allocation of various arrays filled and used later
     #####################################################################
@@ -286,87 +291,6 @@ def CSsignalFunc(data, cosmo):
     xi2 = np.zeros((nthetatot, nzcorrs))
     xi1_theta = np.empty(nzcorrs, dtype=(list, 3))
     xi2_theta = np.empty(nzcorrs, dtype=(list, 3))
-
-
-    ################################################
-    # Shear bias
-    ################################################
-
-    # nuisance parameter for m-correction:
-    dm_per_zbin = np.zeros((data.const['ntheta'], nzbins))
-    if ('dm' in data.nuisance_parameters):
-        for zbin in range(nzbins):
-            dm_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dm'][zbin]
-
-    # nuisance parameters for constant c-correction:
-    dc1_per_zbin = np.zeros((data.const['ntheta'], nzbins))
-    dc2_per_zbin = np.zeros((data.const['ntheta'], nzbins))
-    if ('dc1' in data.nuisance_parameters):
-        for zbin in range(nzbins):
-            dc1_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dc1'][zbin]
-    if ('dc2' in data.nuisance_parameters):
-        for zbin in range(nzbins):
-            dc2_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dc2'][zbin]
-
-    # correlate dc1/2_per_zbin in tomographic order of xi1/2:
-    dc1_sqr = np.zeros((data.const['ntheta'], nzcorrs))
-    dc2_sqr = np.zeros((data.const['ntheta'], nzcorrs))
-    # correlate dm_per_zbin in tomographic order of xi1/2:
-    dm_plus_one_sqr = np.zeros((data.const['ntheta'], nzcorrs))
-    index_corr = 0
-    for zbin1 in range(nzbins):
-        for zbin2 in range(zbin1, nzbins):
-
-            # c-correction:
-            dc1_sqr[:, index_corr] = dc1_per_zbin[:, zbin1] * dc1_per_zbin[:, zbin2]
-            dc2_sqr[:, index_corr] = dc2_per_zbin[:, zbin1] * dc2_per_zbin[:, zbin2]
-
-            # m-correction:
-            dm_plus_one_sqr[:, index_corr] = (1. + dm_per_zbin[:, zbin1]) * (1. + dm_per_zbin[:, zbin2])
-
-            index_corr += 1
-
-    # get c-correction into form of xi_obs
-    temp = np.concatenate((dc1_sqr, dc2_sqr))
-    dc_sqr = OrderXiFunc(temp, data.const['ntheta'], nzcorrs)
-
-    # get m-correction into form of xi_obs
-    temp = np.concatenate((dm_plus_one_sqr, dm_plus_one_sqr))
-    dm_plus_one_sqr_obs = OrderXiFunc(temp, data.const['ntheta'], nzcorrs)
-
-    # Below we construct a theta-dependent c-correction function from
-    # measured data (for one z-bin) and scale it with an amplitude per z-bin
-    # which is to be fitted
-    # this is all independent of the constant c-correction calculated above
-    xip_c = np.zeros((data.const['ntheta'], nzcorrs))
-    xim_c = np.zeros((data.const['ntheta'], nzcorrs))
-    # load theta-dependent c-term function if requested
-    # file is assumed to contain values for the same theta values as used
-    # for xi_pm!
-    if data.conf['use_cterm_function']:
-        fname = os.path.join(data.paths['data'], 'SUPPLEMENTARY_FILES/KV450_xi_pm_c_term.dat')
-        # function is measured over same theta scales as xip, xim
-        xip_c_per_zbin, xim_c_per_zbin = np.loadtxt(fname, usecols=(3, 4), unpack=True)
-        print('Loaded (angular) scale-dependent c-term function from: \n', fname, '\n')
-
-        amps_cfunc = np.ones(nzbins)
-        for zbin in range(nzbins):
-            if ('Ac'in data.nuisance_parameters):
-                amps_cfunc[zbin] = data.nuisance_parameters['Ac']
-
-        index_corr = 0
-        for zbin1 in range(nzbins):
-            for zbin2 in range(zbin1, nzbins):
-                xip_c[:, index_corr] = amps_cfunc[zbin1] * amps_cfunc[zbin2] * xip_c_per_zbin
-                # TODO: we leave xim_c set to 0 for now!
-                #xim_c[:, index_corr] = amps_cfunc[zbin1] * amps_cfunc[zbin2] * xim_c_per_zbin
-
-                index_corr += 1
-    # get it into order of xi_obs
-    # contains only zeros if function is not requested
-    temp = np.concatenate((xip_c, xim_c))
-    xipm_c = OrderXiFunc(temp, data.const['ntheta'], nzcorrs)
-
 
 
     ################################################
@@ -408,17 +332,31 @@ def CSsignalFunc(data, cosmo):
             linear_growth_rate /= cosmo.growth_factor_at_z(0.)
 
 
-
-    # Compute function g_i(r), that depends on r and the bin
+    ################################################
+    # the lens efficiency
+    ################################################
+    # that depends on r and the bin
     # g_i(r) = 2r(1+z(r)) int_r^+\infty drs p_r(rs) (rs-r)/rs
+
+    # Compute now the selection function p(r) = p(z) dz/dr normalized
+    # to one. The np.newaxis helps to broadcast the one-dimensional array
+    # dzdr to the proper shape. Note that p_norm is also broadcasted as
+    # an array of the same shape as p_z
+    pr = pz * (dzdr[:, np.newaxis] / pz_norm)
+
     for Bin in range(nzbins):
         # shift from first entry only useful if first enrty is 0!
         for nr in range(1, nzmax-1):
             fun = pr[nr:, Bin] * (r[nr:] - r[nr]) / r[nr:]
             g[nr, Bin] = np.sum(0.5 * (fun[1:] + fun[:-1]) * (r[nr + 1:] - r[nr:-1]))
             g[nr, Bin] *= 2. * r[nr] * (1. + z_p[nr])
-    
-    # Get power spectrum P(k=l/r,z(r)) from cosmological module
+
+
+
+    ################################################
+    # matter power spectrum
+    ################################################    
+    # P(k=l/r,z(r)) from cosmological module
     kmax_in_inv_Mpc = data.const['k_max_h_by_Mpc'] * small_h
     for index_l in range(nlmax):
         for index_z in range(1, nzmax):
@@ -435,6 +373,9 @@ def CSsignalFunc(data, cosmo):
             pk_lin[index_l, index_z] = pk_lin_dm
 
 
+    ################################################
+    # convergence power spectrum
+    ################################################    
     Cl_GG_integrand = np.zeros_like(Cl_integrand)
     Cl_GG = np.zeros_like(Cl)
 
@@ -499,6 +440,11 @@ def CSsignalFunc(data, cosmo):
     for Bin in range(nzcorrs):
         Cll[Bin,:] = itp.splev(lll[:], spline_Cl[Bin])
 
+
+
+    ################################################
+    # shear correlation function
+    ################################################    
     if data.conf['integrate_Bessel_with'] == 'brute_force':
         # this seems to produce closest match in comparison with CCL
         # I still don't like the approach of just integrating the Bessel
@@ -567,7 +513,6 @@ def CSsignalFunc(data, cosmo):
 
     # Spline the xi's
     for Bin in range(nzcorrs):
-
         xi1_theta[Bin] = list(itp.splrep(theta, xi1[:,Bin]))
         xi2_theta[Bin] = list(itp.splrep(theta, xi2[:,Bin]))
 
@@ -614,14 +559,87 @@ def CSsignalFunc(data, cosmo):
             xi[j:j + data.const['ntheta']] = itp.splev(theta_bins[:data.const['ntheta']], xi1_theta[Bin])
             xi[j + data.const['ntheta']:j + 2 * data.const['ntheta']] = itp.splev(theta_bins[:data.const['ntheta']], xi2_theta[Bin])
 
-    # here we add the theta-dependent c-term function
-    # it's zero if not requested!
-    # same goes for constant relative offset of c-correction dc_sqr
-    # TODO: in both arrays the xim-component is set to zero for now!!!
-    #print(xi, xi.shape)
-    #print(xipm_c, xipm_c.shape)
-    #print(dc_sqr, dc_sqr.shape)
 
+
+
+
+
+    ################################################
+    # Shear bias
+    ################################################
+    # nuisance parameter for m-correction:
+    dm_per_zbin = np.zeros((data.const['ntheta'], nzbins))
+    if ('dm' in data.nuisance_parameters):
+        for zbin in range(nzbins):
+            dm_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dm'][zbin]
+
+    # nuisance parameters for constant c-correction:
+    dc1_per_zbin = np.zeros((data.const['ntheta'], nzbins))
+    dc2_per_zbin = np.zeros((data.const['ntheta'], nzbins))
+    if ('dc1' in data.nuisance_parameters):
+        for zbin in range(nzbins):
+            dc1_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dc1'][zbin]
+    if ('dc2' in data.nuisance_parameters):
+        for zbin in range(nzbins):
+            dc2_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dc2'][zbin]
+
+    # correlate dc1/2_per_zbin in tomographic order of xi1/2:
+    dc1_sqr = np.zeros((data.const['ntheta'], nzcorrs))
+    dc2_sqr = np.zeros((data.const['ntheta'], nzcorrs))
+    # correlate dm_per_zbin in tomographic order of xi1/2:
+    dm_plus_one_sqr = np.zeros((data.const['ntheta'], nzcorrs))
+    index_corr = 0
+    for zbin1 in range(nzbins):
+        for zbin2 in range(zbin1, nzbins):
+
+            # c-correction:
+            dc1_sqr[:, index_corr] = dc1_per_zbin[:, zbin1] * dc1_per_zbin[:, zbin2]
+            dc2_sqr[:, index_corr] = dc2_per_zbin[:, zbin1] * dc2_per_zbin[:, zbin2]
+
+            # m-correction:
+            dm_plus_one_sqr[:, index_corr] = (1. + dm_per_zbin[:, zbin1]) * (1. + dm_per_zbin[:, zbin2])
+
+            index_corr += 1
+
+    # get c-correction into form of xi_obs
+    temp = np.concatenate((dc1_sqr, dc2_sqr))
+    dc_sqr = OrderXiFunc(temp, data.const['ntheta'], nzcorrs)
+
+    # get m-correction into form of xi_obs
+    temp = np.concatenate((dm_plus_one_sqr, dm_plus_one_sqr))
+    dm_plus_one_sqr_obs = OrderXiFunc(temp, data.const['ntheta'], nzcorrs)
+
+    # Below we construct a theta-dependent c-correction function from
+    # measured data (for one z-bin) and scale it with an amplitude per z-bin
+    # which is to be fitted
+    # this is all independent of the constant c-correction calculated above
+    xip_c = np.zeros((data.const['ntheta'], nzcorrs))
+    xim_c = np.zeros((data.const['ntheta'], nzcorrs))
+    # load theta-dependent c-term function if requested
+    # file is assumed to contain values for the same theta values as used
+    # for xi_pm!
+    if data.conf['use_cterm_function']:
+        fname = os.path.join(data.paths['data'], 'SUPPLEMENTARY_FILES/KV450_xi_pm_c_term.dat')
+        # function is measured over same theta scales as xip, xim
+        xip_c_per_zbin, xim_c_per_zbin = np.loadtxt(fname, usecols=(3, 4), unpack=True)
+        print('Loaded (angular) scale-dependent c-term function from: \n', fname, '\n')
+
+        amps_cfunc = np.ones(nzbins)
+        for zbin in range(nzbins):
+            if ('Ac'in data.nuisance_parameters):
+                amps_cfunc[zbin] = data.nuisance_parameters['Ac']
+
+        index_corr = 0
+        for zbin1 in range(nzbins):
+            for zbin2 in range(zbin1, nzbins):
+                xip_c[:, index_corr] = amps_cfunc[zbin1] * amps_cfunc[zbin2] * xip_c_per_zbin
+                # TODO: we leave xim_c set to 0 for now!
+                #xim_c[:, index_corr] = amps_cfunc[zbin1] * amps_cfunc[zbin2] * xim_c_per_zbin
+                index_corr += 1
+    # get it into order of xi_obs
+    # contains only zeros if function is not requested
+    temp = np.concatenate((xip_c, xim_c))
+    xipm_c = OrderXiFunc(temp, data.const['ntheta'], nzcorrs)
 
     xi = xi * dm_plus_one_sqr_obs + xipm_c + dc_sqr
 
@@ -629,6 +647,7 @@ def CSsignalFunc(data, cosmo):
     io_cs.WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, xi, data.conf['sample'])
     print('Predicted vector saved.')
     print('All Done.')
+
 
 def OrderXiFunc(temp, ntheta, nzcorrs):
         """
@@ -662,6 +681,7 @@ def IAFactorFunc(small_h, Omega_m, rho_crit,
 
     return factor
 
+
 def RhoCriticalFunc(small_h):
     """
     The critical density of the Universe at redshift 0.
@@ -681,7 +701,6 @@ def RhoCriticalFunc(small_h):
     rho_crit_0 = 3. * (small_h * H100_s)**2. / (8. * np.pi * G_const_Mpc_Msun_s)
 
     return rho_crit_0
-
 
 
 #######################################################################################################

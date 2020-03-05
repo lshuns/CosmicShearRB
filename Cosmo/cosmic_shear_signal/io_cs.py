@@ -88,6 +88,7 @@ def ReadZdistribution(data, nzbins):
             # we add a zero as first element because we want to integrate down to z = 0!
             z_samples += [np.concatenate((np.zeros(1), zptemp + shift_to_midpoint))]
             hist_samples += [np.concatenate((np.zeros(1), hist_pz))]
+
         else:
             raise Exception("dn/dz file not found:\n %s"%window_file_path)
     print('Loaded redshift distributions from: \n', os.path.join(
