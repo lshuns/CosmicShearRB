@@ -23,7 +23,7 @@ import math
 import io_cs
 
 
-def CSsignalFunc(data, cosmo):
+def CSsignalFunc(data, cosmo, save_theory_vector=False):
     """
     Modeling the cosmic shear signal from theory 
     """
@@ -37,12 +37,18 @@ def CSsignalFunc(data, cosmo):
     #####################################################################
     # read in data vector
     #####################################################################
-    # the theta list is the one actually used
-    path_tmp = os.path.join(data.paths['data'], 'data_vector/for_cosmo/' + data.conf['prefix_data_vector'] + data.conf['sample'] + '.dat')
-    theta, _, _ = np.loadtxt(path_tmp, unpack=True)
-    print('Loaded data vectors from: \n', path_tmp)
-    # we assume theta is same for xi_p and xi_m
-    theta_bins = np.concatenate((theta, theta))
+    tmp = io_cs.ReadDataVectorFunc(data, nzbins, nzcorrs)
+
+    theta_bins = tmp[:, 0]
+    if (np.sum(
+        (theta_bins[:data.const['ntheta']] -
+            theta_bins[data.const['ntheta']:])**2) > 1e-6):
+        raise Exception(
+                'The angular values at which xi_p and xi_m '
+                'are observed do not match.')
+
+    # create the data-vector:
+    xi_obs = OrderXiFunc((tmp[:, 1:]), data.const['ntheta'], nzcorrs)
 
     # Read angular cut values
     if data.conf['use_cut_theta']:
@@ -53,74 +59,32 @@ def CSsignalFunc(data, cosmo):
         mask_suffix = data.conf['cutvalues_file'][:-4]
 
 
-
     #####################################################################
     # read redshift distribution
     #####################################################################
     z_samples, hist_samples, nz_samples = io_cs.ReadZdistribution(data, nzbins)
 
-    # prevent undersampling of histograms!
-    if data.const['nzmax'] < nz_samples:
-        print("You are trying to integrate at lower resolution than supplied by the n(z) histograms. \n Increase nzmax! Aborting run now... \n")
-        exit()
-    # if that's the case, we want to integrate at histogram resolution and need to account for
-    # the extra zero entry added
-    elif data.const['nzmax'] == nz_samples:
-        nzmax = z_samples.shape[1]
-        # requires that z-spacing is always the same for all bins...
-        z_p = z_samples[0, :]
-        print('Redshift integrations performed at resolution of redshift distribution histograms! \n')
-    # if we interpolate anyway at arbitrary resolution the extra 0 doesn't matter
-    else:
-        nzmax = data.const['nzmax'] + 1
-        z_p = np.linspace(z_samples.min(), z_samples.max(), nzmax)
-        print('Redshift integrations performed at set "nzmax" resolution! \n')
+    nzmax = z_samples.shape[1]
+    # requires that z-spacing is always the same for all bins...
+    z_p = z_samples[0, :]
+    print('Redshift integrations performed at resolution of redshift distribution histograms! \n')
 
     pz = np.zeros((nzmax, nzbins))
     pz_norm = np.zeros(nzbins)
     for zbin in range(nzbins):
-        # we assume that the histograms loaded are given as left-border histograms
-        # and that the z-spacing is the same for each histogram
-        spline_pz = itp.interp1d(z_samples[zbin, :], hist_samples[zbin, :], kind=data.conf['type_redshift_interp'])
-        mask_min = z_p >= z_samples[zbin, :].min()
-        mask_max = z_p <= z_samples[zbin, :].max()
+        # redshift offset
+        param_name = 'D_z{:}'.format(zbin + 1)
+        z_mod = z_p + data.nuisance_parameters['D_z'][param_name]
+        # the artificial zero-point is not included for spline
+        spline_pz = itp.interp1d(z_samples[zbin, 1:], hist_samples[zbin, 1:], kind=data.conf['type_redshift_interp'])
+        mask_min = z_mod >= z_samples[zbin, 1:].min()
+        mask_max = z_mod <= z_samples[zbin, 1:].max()
         mask_z = mask_min & mask_max
         # points outside the z-range of the histograms are set to 0!
-        pz[mask_z, zbin] = spline_pz(z_p[mask_z])
+        pz[mask_z, zbin] = spline_pz(z_mod[mask_z])
         # Normalize selection functions
         dz = z_p[1:] - z_p[:-1]
         pz_norm[zbin] = np.sum(0.5 * (pz[1:, zbin] + pz[:-1, zbin]) * dz)
-
-    if ('D_z' in data.nuisance_parameters):
-
-        # Create labels for loading of dn/dz-files:
-        zbin_labels = []
-        for i in range(nzbins):
-            zbin_labels += ['{:.1f}t{:.1f}'.format(data.const['z_bins_min'][i], data.const['z_bins_max'][i])]
-
-        pz = np.zeros((nzmax, nzbins))
-        pz_norm = np.zeros(nzbins)
-        for zbin in range(nzbins):
-
-            param_name = 'D_z{:}'.format(zbin + 1)
-            z_mod = z_p + data.nuisance_parameters['D_z'][param_name]
-
-            # Load n(z) again:
-            fname = os.path.join(
-            data.paths['data'], 'redshift/' + data.conf['sample'] + '/Nz_{0:}/Nz_{0:}_Mean/Nz_{0:}_z{1:}.asc'.format(data.conf['nz_method'], zbin_labels[zbin]))
-            zptemp, hist_pz = np.loadtxt(fname, usecols=(0, 1), unpack=True)
-            shift_to_midpoint = np.diff(zptemp)[0] / 2.
-            
-            spline_pz = itp.interp1d(zptemp + shift_to_midpoint, hist_pz, kind=data.conf['type_redshift_interp'])
-            
-            mask_min = z_mod >= zptemp.min() + shift_to_midpoint
-            mask_max = z_mod <= zptemp.max() + shift_to_midpoint
-            mask_tmp = mask_min & mask_max
-            # points outside the z-range of the histograms are set to 0!
-            pz[mask_tmp, zbin] = spline_pz(z_mod[mask_tmp])
-            # Normalize selection functions
-            dz = z_p[1:] - z_p[:-1]
-            pz_norm[zbin] = np.sum(0.5 * (pz[1:, zbin] + pz[:-1, zbin]) * dz)
 
 
     #####################################################################
@@ -644,9 +608,11 @@ def CSsignalFunc(data, cosmo):
     xi = xi * dm_plus_one_sqr_obs + xipm_c + dc_sqr
 
     # write out masked theory vector in list format:    
-    io_cs.WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, xi, data.conf['sample'])
-    print('Predicted vector saved.')
-    print('All Done.')
+    if save_theory_vector:
+        io_cs.WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, xi, data.conf['sample'])
+        print('Predicted vector saved.')
+    
+    return xi_obs, xi, theta_bins, mask
 
 
 def OrderXiFunc(temp, ntheta, nzcorrs):

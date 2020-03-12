@@ -17,8 +17,17 @@ data.cosmo_arguments['n_s']          = 1.021
 # Hubble parameter
 data.cosmo_arguments['h']            = 0.745
 
-# Baryon feedback amplitude ('hmcode'):
+## METHOD FOR NON-LINEAR CORRECTIONS ##
+# choose the method for calculation of non-linear corrections, any CLASS keyword
+# is possible, but the default choices are
+# 1) 'halofit' (including Takahashi's update) and
+# 2) 'hmcode' (Mead et al. 2015, 2016)
+# the choice between the two affects also the choice of the baryon feedback
+# modelling further below!
+# for fiducial KV450 analysis: 'hmcode'
 data.cosmo_arguments['non linear']   = 'hmcode'
+
+# Baryon feedback amplitude ('hmcode'):
 data.cosmo_arguments['c_min']        = 2.484
 
 
@@ -72,4 +81,4 @@ data.nuisance_parameters['A_IA'] = 0.981
 data.nuisance_parameters['Ac'] = 1.022
 
 # Redshift offset
-data.nuisance_parameters['D_z'] = {'D_z1': -0.007, 'D_z2': -0.010, 'D_z3': 0.013, 'D_z4': 0.001, 'D_z5': -0.001}
+data.nuisance_parameters ['D_z'] = {'D_z1': -0.007, 'D_z2': -0.010, 'D_z3': 0.013, 'D_z4': 0.001, 'D_z5': -0.001}
