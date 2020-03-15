@@ -18,8 +18,8 @@ WgBin2DFunc:
     Calculate the weighted quantile by given bin numbers
         designed for 2D numpy array
 
-mcCalFunc:    
-    Calculating the residual shear bias in 2-d bins
+mCalFunc:    
+    Calculating the residual shear bias (m-value) in 2-d bins
 """
 
 import numpy as np
@@ -43,12 +43,6 @@ def WgQuantile1DFunc(values, weights, pq):
     """
     Calculate the weighted quantile by given probabilities 
         designed for 1D numpy array.
-
-
-    Parameters
-    ----------
-
-
     """
 
     # Sort the data
@@ -89,12 +83,11 @@ def WgBin2DFunc(v1, v2, wgs, Nbin1, Nbin2):
     return q1, np.array(q2s)
 
 
-def mcCalFunc(dataSim, dataReal, 
+def mCalFunc(id_bin, dataSim, dataReal, 
                 Nbin1, Nbin2, pq):    
     """
     Calculating the residual shear bias in 2-d bins
     """
-
 
     # helper quantities
     # Simulation
@@ -220,7 +213,7 @@ def mcCalFunc(dataSim, dataReal,
                 # m = (m1 + m2)/2.
 
                 # Performing Bootstrap
-                nboot = 30
+                nboot = 50
                 m1_sample = np.zeros(nboot)
                 m2_sample = np.zeros(nboot)
                 m_sample = np.zeros(nboot)
@@ -282,7 +275,7 @@ def mcCalFunc(dataSim, dataReal,
     m_err_BS_final = np.sqrt(np.sum((wgRealSums*m_err_BSs)**2.))/np.sum(wgRealSums)
 
     #
-    res = {"m_final": m_final, 'm_err_BS_final': m_err_BS_final, \
+    res = {"id_bin": id_bin, "m_final": m_final, 'm_err_BS_final': m_err_BS_final, \
         'm1_final': m1_final, 'm2_final': m2_final, \
         'm1_err_final': m1_err_final, 'm2_err_final': m2_err_final, \
         'm1_err_BS_final': m1_err_BS_final, 'm2_err_BS_final': m2_err_BS_final}
