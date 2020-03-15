@@ -8,13 +8,15 @@ Created on Wed Nov  6 16:56:40 2019
 Module to perform split of sources
 
 SplitByNumFunc (worn-out, use SplitByWgFunc instead):
-Split sample based on object numbers.
+    Split sample based on object numbers.
 
 SplitByWgFunc:
-Split sample based on object weights (wg) using assigned ratio.
+    Split sample based on object weights (wg) using assigned ratio.
 
 SplitByValFunc (mp supported):
-Split sample based on a specific value.
+    Split sample based on a specific value.
+    less: <= cvalue
+    greater: > cvalue
 """
 
 import pandas as pd 
