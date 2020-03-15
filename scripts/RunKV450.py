@@ -6,6 +6,16 @@ Created on Sat Feb  8 15:27:14 2020
 @author: ssli
 
 Script to run the data process for downloaded KV450 catalogues
+
+Package:
+    KV450: 
+        SelecFunc: selection
+        TomoBinFunc: redshift binning
+        CombPatchFunc: combine all patches
+Data location:
+    Parent: KV450 
+    Input: original
+    Output: selected, log, tomo
 """
 
 import multiprocessing as mp
@@ -22,20 +32,28 @@ import sys
 sys.path.insert(0,os.path.realpath('..')) 
 from KV450 import SelecFunc, TomoBinFunc, CombPatchFunc
 
+# ++++++++++++++++++++++++++ General information
+# Parent path
+data_path = "/disks/shear15/ssli/KV450/"
+patches = ["G9","G12","G15","G23","GS"]
+zbins_min = [0.1, 0.3, 0.5, 0.7, 0.9]
+zbins_max = [0.3, 0.5, 0.7, 0.9, 1.2]
+# column used as redshift
+z_col = 'Z_B'
+
 
 # ++++++++++++++++++++++++++ selection
 start_SelecFunc = time.time()
 
 # input
-inpathF = "/disks/shear15/ssli/KV450/original/KV450_"
+inpathF = data_path + "original/KV450_"
 inpathP = "_reweight_3x4x4_v2_good.cat"
-patches = ["G9","G12","G15","G23","GS"]
 
 # output
-outdir = "/disks/shear15/ssli/KV450/selected/"
+outdir = data_path + "selected/"
     
 # data information
-log_data = open("/disks/shear15/ssli/KV450/log/number_patch.csv", "w")
+log_data = open(data_path + "log/number_patch.csv", "w")
 
 # for mp
 jobs = []
@@ -69,20 +87,14 @@ end_SelecFunc = time.time()
 # ++++++++++++++++++++++++++ redshift binning
 start_TomoBinFunc = time.time()
 
-zbins_min = [0.1, 0.3, 0.5, 0.7, 0.9]
-zbins_max = [0.3, 0.5, 0.7, 0.9, 1.2]
-patches = ["G9","G12","G15","G23","GS"]
-# column used as redshift
-z_col = 'Z_B'
-
 # inpath directory
-inpathF = "/disks/shear15/ssli/KV450/selected/"
+inpathF = data_path + "selected/"
 
 # outpath
-outdir = "/disks/shear15/ssli/KV450/tomo/"
+outdir = data_path + "tomo/"
 
 # running information
-log_bins = open("/disks/shear15/ssli/KV450/log/number_tomo_patch.csv", "w")
+log_bins = open(data_path + "log/number_tomo_patch.csv", "w")
 
 # for mp
 jobs = []
@@ -119,17 +131,15 @@ end_TomoBinFunc = time.time()
 # ++++++++++++++++++++++++++ Combine all the patches
 start_CombPatchFunc = time.time()
 
-indir = "/disks/shear15/ssli/KV450/tomo/"
-outdir = "/disks/shear15/ssli/KV450/tomo/"
-patches =  ["G9","G12","G15","G23","GS"]
-nbins = 5
+indir = data_path + "tomo/"
+outdir = data_path + "tomo/"
+nbins = len(zbins_min)
 
-outpath_inf = "/disks/shear15/ssli/KV450/log/number_tomo.csv"
+outpath_inf = data_path + "log/number_tomo.csv"
 aORw = 'w'
 
-
 # running information
-log_patches = open("/disks/shear15/ssli/KV450/log/number_tomo.csv", "w")
+log_patches = open(data_path + "log/number_tomo.csv", "w")
 
 
 # for mp
@@ -165,7 +175,7 @@ end_CombPatchFunc = time.time()
 print("Running time for SelecFunc", end_SelecFunc-start_SelecFunc, "seconds.")
 print("Running time for TomoBinFunc", end_TomoBinFunc-start_TomoBinFunc, "seconds.")
 print("Running time for CombPatchFunc", end_CombPatchFunc-start_CombPatchFunc, "seconds.")
-# Running on markermeer
-# Running time for SelecFunc 114.11349105834961 seconds.
-# Running time for TomoBinFunc 43.105056285858154 seconds.
-# Running time for CombPatchFunc 57.36755561828613 seconds.
+# Running on eemmeer (March 15, 2020)
+# Running time for SelecFunc 120.34359693527222 seconds.
+# Running time for TomoBinFunc 36.36951780319214 seconds.
+# Running time for CombPatchFunc 54.628947257995605 seconds.

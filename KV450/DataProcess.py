@@ -22,7 +22,6 @@ TomoBinFunc (mp supported):
 
 CombPatchFunc (mp supported):
     Combine all patches.
-
 """
 
 import numpy as np
@@ -50,7 +49,6 @@ def SelecFunc(inpath,
         Object used for communication 
         between parallel processes.
     """
-
 
     # with scope making the file be closed automatically
     with fits.open(inpath, memmap=True) as hdul:        
