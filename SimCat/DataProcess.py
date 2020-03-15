@@ -19,7 +19,6 @@ TomoBinFunc:
     Bin3: (0.5, 0.7]
     Bin4: (0.7, 0.9]
     Bin5: (0.9, 1.2]
-
 """
 
 import numpy as np
@@ -68,6 +67,9 @@ def SelecFunc(inpath, outpath, logpath=None):
     # # some random cut to the maximum snr
     # snr_cuts = (df.snr_model<210)
     #
+    # # selection for full sample (more conservative)
+    # df_select = df[fitcuts & star_cuts & weight_cuts & blend_cuts & TB_cuts & binary_star_cuts & tiny_cuts & snr_cuts]
+    # selection used for calibration
     df_select = df[fitcuts & weight_cuts & blend_cuts & TB_cuts & binary_star_cuts & tiny_cuts]
     
     # save data
@@ -124,7 +126,6 @@ def TomoBinFunc(indata, z_col, zbins_min, zbins_max,
     if logpath != None:
         log = open(logpath, 'w')
         print("id_tomo,number", file=log)
-
 
     for i in range(len(zbins_min)):
         zmin = zbins_min[i]
