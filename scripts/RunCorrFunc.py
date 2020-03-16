@@ -5,7 +5,20 @@ Created on Mon Feb 10 11:56:24 2020
 
 @author: ssli
 
-script to run the correlation function using TreeCorr
+Script to run the correlation function using TreeCorr
+    Analyse different samples separately
+
+Package:
+    CorrFunc: MeanFunc, CorrFunc, CorrPlotFunc, CorrCosmoFunc, CorrErrCosmoFunc, CorrErrPlotFunc
+
+Data location:
+    Input: 
+        m-value: CosmicShear/shear_bias/
+        data: KV450/tomo, KV450/split
+    Output: CosmicShear/data_vector/
+        original: treecorr/
+        rearranged: for_cosmo, for_plot
+        c-term: CosmicShear/shear_bias/
 """
 
 
@@ -43,17 +56,19 @@ nthr = 8
 # m value
 mss = []
 #
-path_m_whole = "/disks/shear15/ssli/CosmicShear/shear_bias/Summary_multiplicative_whole.csv"
-path_m_red = "/disks/shear15/ssli/CosmicShear/shear_bias/Summary_multiplicative_red.csv"
-path_m_blue = "/disks/shear15/ssli/CosmicShear/shear_bias/Summary_multiplicative_blue.csv"
+path_m_whole = "/disks/shear15/ssli/CosmicShear/shear_bias/Summary_m_whole.csv"
+path_m_red = "/disks/shear15/ssli/CosmicShear/shear_bias/Summary_m_less3.csv"
+path_m_blue = "/disks/shear15/ssli/CosmicShear/shear_bias/Summary_m_greater3.csv"
 #
 tmp = pd.read_csv(path_m_whole)
-mss.append(tmp['m'].values)
+ms = tmp.sort_values(by='bin')['m'].values
+mss.append(ms)
 tmp = pd.read_csv(path_m_red)
-mss.append(tmp['m'].values)
+ms = tmp.sort_values(by='bin')['m'].values
+mss.append(ms)
 tmp = pd.read_csv(path_m_blue)
-mss.append(tmp['m'].values)
-
+ms = tmp.sort_values(by='bin')['m'].values
+mss.append(ms)
 
 # input path
 # data 
@@ -68,8 +83,8 @@ inpathPs =['.feather', \
 # output path 
 outpathF = "/disks/shear15/ssli/CosmicShear/data_vector/treecorr/"
 outpathPs =['_whole.dat', \
-            '_red.dat', \
-            '_blue.dat']
+            '_less3.dat', \
+            '_greater3.dat']
 
 # rearrange catalogue path
 #
@@ -77,103 +92,138 @@ ReoutpathFs_cosmo = ["/disks/shear15/ssli/CosmicShear/data_vector/for_cosmo/xi_f
                         "/disks/shear15/ssli/CosmicShear/data_vector/for_cosmo/xi_for_cosmo_", \
                         "/disks/shear15/ssli/CosmicShear/data_vector/for_cosmo/xi_for_cosmo_"]
 #
-ReoutpathPs_cosmo = ["_whole.dat", "_red.dat", "_blue.dat"]
+ReoutpathPs_cosmo = ["_whole.dat", "_less3.dat", "_greater3.dat"]
 #
 Reoutpaths_plot_withoutK = ["/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withoutK_whole.dat", \
-                        "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withoutK_red.dat", \
-                        "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withoutK_blue.dat"]
+                        "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withoutK_less3.dat", \
+                        "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withoutK_greater3.dat"]
 #
 Reoutpaths_plot_withK = ["/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withK_whole.dat", \
-                    "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withK_red.dat", \
-                    "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withK_blue.dat"]
+                    "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withK_less3.dat", \
+                    "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withK_greater3.dat"]
 #
 Reoutpaths_plot_err = ["/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_error_whole.dat", \
-                    "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_error_red.dat", \
-                    "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_error_blue.dat"]
+                    "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_error_less3.dat", \
+                    "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_error_greater3.dat"]
 
 
-# # c-term
-# log_cW = open("/disks/shear15/ssli/CosmicShear/shear_bias/e_vs_ZB_whole.csv", 'w')
-# print("patch,bin,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log_cW)
-# log_cR = open("/disks/shear15/ssli/CosmicShear/shear_bias/e_vs_ZB_red.csv", 'w')
-# print("patch,bin,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log_cR)
-# log_cB = open("/disks/shear15/ssli/CosmicShear/shear_bias/e_vs_ZB_blue.csv", 'w')
-# print("patch,bin,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log_cB)
-# log_cs = [log_cW, log_cR, log_cB]
+# c-term
+log_cW = open("/disks/shear15/ssli/CosmicShear/shear_bias/e_vs_ZB_whole.csv", 'w')
+print("patch,bin,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log_cW)
+log_cR = open("/disks/shear15/ssli/CosmicShear/shear_bias/e_vs_ZB_less3.csv", 'w')
+print("patch,bin,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log_cR)
+log_cB = open("/disks/shear15/ssli/CosmicShear/shear_bias/e_vs_ZB_greater3.csv", 'w')
+print("patch,bin,e1_ave,e2_ave,e1_ave_b,e1_err_b,e2_ave_b,e2_err_b", file=log_cB)
+log_cs = [log_cW, log_cR, log_cB]
 
 
-# jobs = []
-# for kk in range(len(inpathFs)):
-#     ms = mss[kk]
+jobs = []
+for kk in range(len(inpathFs)):
 
-#     inpathF = inpathFs[kk]
-#     inpathP = inpathPs[kk]
-#     outpathP = outpathPs[kk]
-#     log_c = log_cs[kk]
+    inpathF = inpathFs[kk]
+    inpathP = inpathPs[kk]
+    outpathP = outpathPs[kk]
+    log_c = log_cs[kk]
 
-#     # build treecorr catalog
-#     cat = []
-#     for i in range(nzbins):
-        
-#         m = ms[i]
-    
-#         data = []
-#         for patch in patches:
+    # build treecorr catalog
+    cat = [] # patches followed by zbins
+    for patch in patches:
+        for i in range(nzbins):
 
-#             inpath = inpathF + patch + '_tomo' + str(i+1) + inpathP
+            inpath = inpathF + patch + '_tomo' + str(i+1) + inpathP
 
-#             tmp = feather.read_dataframe(inpath)
+            tmp = feather.read_dataframe(inpath)
 
-#             # c-term           
-#             c_term = MeanFunc(tmp['bias_corrected_e1'], tmp['bias_corrected_e2'], tmp["recal_weight"])
-#             print(patch, i+1, 
-#                 c_term['e1_ave'], c_term['e2_ave'],
-#                 c_term['e1_ave_b'], c_term['e1_err_b'], c_term['e2_ave_b'], c_term['e2_err_b'], 
-#                 sep=',', file=log_c)
+            # c-term           
+            c_term = MeanFunc(tmp['bias_corrected_e1'], tmp['bias_corrected_e2'], tmp["recal_weight"])
+            print(patch, i+1, 
+                c_term['e1_ave'], c_term['e2_ave'],
+                c_term['e1_ave_b'], c_term['e1_err_b'], c_term['e2_ave_b'], c_term['e2_err_b'], 
+                sep=',', file=log_c)
 
-#             tmp['bias_corrected_e1'] -= c_term['e1_ave'] 
-#             tmp['bias_corrected_e2'] -= c_term['e2_ave']
+            tmp['bias_corrected_e1'] -= c_term['e1_ave'] 
+            tmp['bias_corrected_e2'] -= c_term['e2_ave']
 
-#             data.append(tmp)
-
-
-#         data = pd.concat(data)
+            data = tmp
             
-#         print("Data built for bin", str(i+1), "in loop", kk)
+            print("Data built for patch", patch, "bin", str(i+1), "in loop", kk)
 
-#         cat.append(treecorr.Catalog(ra=data["ALPHA_J2000"], dec=data["DELTA_J2000"], 
-#                                     ra_units="deg", dec_units="deg", 
-#                                     w=data["recal_weight"],
-#                                     g1=data["bias_corrected_e1"], g2=data["bias_corrected_e2"]))
+            cat.append(treecorr.Catalog(ra=data["ALPHA_J2000"], dec=data["DELTA_J2000"], 
+                                        ra_units="deg", dec_units="deg", 
+                                        w=data["recal_weight"],
+                                        g1=data["bias_corrected_e1"], g2=data["bias_corrected_e2"]))
     
-#     print("Treecorr catalogues built", "in loop", kk)
-#     log_c.close()
+    print("Treecorr catalogues built", "in loop", kk)
+    log_c.close()
+
+    # calculate correlation function
+    for id_patch in range(len(patches)):
+        patch = patches[id_patch]
+
+        for idx_z1_ori in range(nzbins):
+            idx_z1 = idx_z1_ori + id_patch*nzbins
+            for idx_z2_ori in range(idx_z1_ori, nzbins):
+                idx_z2 = idx_z2_ori + id_patch*nzbins
+
+                outpath = outpathF + 'tomo_' + str(idx_z1_ori+1) + '_' + str(idx_z2_ori+1) + '_' + patch + outpathP
+
+                if idx_z1_ori == idx_z2_ori:
+                    p = mp.Process(target=CorrFunc, args=(cat[idx_z1], None, outpath, 
+                                    theta_nbins, theta_min, theta_max, theta_unit, theta_bin_slop, nthr))
+
+                else:
+                    p = mp.Process(target=CorrFunc, args=(cat[idx_z1], cat[idx_z2], outpath, 
+                                    theta_nbins, theta_min, theta_max, theta_unit, theta_bin_slop, nthr))
+
+                jobs.append(p)
+
+                p.start()
+
+                print("Loop", kk, 'patch', patch, "bin",  (str(idx_z1+1) + '_' + str(idx_z2+1)), "started...")
+
+for p in jobs:
+    p.join()
+
+print("Running Finished.")
 
 
-#     # calculate correlation function
-#     for idx_z1 in range(nzbins):
-#         for idx_z2 in range(idx_z1, nzbins):
+# combine all the patches
+header ="   r_nom       meanr       meanlogr       xip          xim         xip_im       xim_im     sigma_xip    sigma_xim      weight       npairs"
+for kk in range(len(inpathFs)):
 
-#             outpath = outpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + outpathP
+    outpathP = outpathPs[kk]
 
-#             if idx_z1 == idx_z2:
-#                 p = mp.Process(target=CorrFunc, args=(cat[idx_z1], None, outpath, 
-#                                 theta_nbins, theta_min, theta_max, theta_unit, theta_bin_slop, nthr))
+    for idx_z1 in range(nzbins):
+        for idx_z2 in range(idx_z1, nzbins):
 
-#             else:
-#                 p = mp.Process(target=CorrFunc, args=(cat[idx_z1], cat[idx_z2], outpath, 
-#                                 theta_nbins, theta_min, theta_max, theta_unit, theta_bin_slop, nthr))
+            outpath = outpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + outpathP
 
-#             jobs.append(p)
+            xi_list = []
+            for patch in patches:
+                inpath = outpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + '_' + patch + outpathP
 
-#             p.start()
+                xi_list.append(np.loadtxt(inpath))
 
-#             print("Loop", kk, "start on",  (str(idx_z1+1) + str(idx_z2+1)), "...")
+            print('xi_list in combining patches', xi_list)
+            xi_out = np.zeros(np.shape(xi_list[0]))
 
-# for p in jobs:
-#     p.join()
+            xis = np.dstack(xi_list)
+            print('xis in combining patches', xis)
 
-# print("Running Finished.")
+            wg = 1./xis[:,7]**2. # the error for xi
+            for id_col in range(len(xi_out[:])):
+                if (id_col != 7) and (id_col != 8) and (id_col != 9) and (id_col != 10):
+                    # weight average for parameters
+                    xi_out[:, id_col] = np.average(xis[:,id_col], axis=1, weights=wg)
+                elif (id_col==7) or (id_col==8):
+                    # for errors
+                    xi_out[:,id_col] = np.sqrt(1./np.sum(1./xis[:,id_col]**2, axis=1))
+                else:
+                    # for weights and npairs
+                    xi_out[:,id_col] = np.sum(xis[:,id_col], axis=1)
+
+            np.savetxt(outpath, xi_out, fmt='%.4e', header=header)
+
 
 # Rearrange the result
 print("Start rearrange the results...")
@@ -221,3 +271,5 @@ for i in range(len(Reoutpaths_plot_withoutK)):
 
 
 print("All finished in", time.time()-Start)
+# eemmeer (March 16, 2020)
+# All finished in 279.2406942844391

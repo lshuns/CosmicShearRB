@@ -125,11 +125,9 @@ def CorrCosmoFunc(Nbins=None, ntheta=None,
             # xi_m
             xi_m = dat[:,4]
 
-            if m_list != []:                
-                Kplus1 = (1. + m_list[idx_z1]) * (1 + m_list[idx_z2]) 
-        
-                xi_p = xi_p / Kplus1
-                xi_m = xi_m / Kplus1
+            if m_list != []:                        
+                xi_p = xi_p / (1. + m_list[idx_z1]) / (1 + m_list[idx_z2]) 
+                xi_m = xi_m / (1. + m_list[idx_z1]) / (1 + m_list[idx_z2]) 
 
                 outpath = outpathF + 'tomo_' + str(idx_z1+1) + '_' + str(idx_z2+1) + '_withK' + outpathP
             else:
