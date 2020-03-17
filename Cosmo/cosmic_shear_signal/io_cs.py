@@ -30,8 +30,7 @@ def ReadDataVectorFunc(data, nzbins, nzcorrs):
     for zbin1 in range(nzbins):
         for zbin2 in range(zbin1, nzbins):
 
-            # data_vector_path = os.path.join(data_path, 'data_vector/for_cosmo/xi_for_cosmo_tomo_{:}_{:}_withK_'.format(zbin1+1, zbin2+1) + data_sample + '.dat')
-            data_vector_path = os.path.join(data_path, 'KV450_COSMIC_SHEAR_DATA_RELEASE/DATA_VECTOR/KV450_xi_pm_files/KV450_xi_pm_tomo_{:}_{:}_'.format(zbin1+1, zbin2+1) + data_sample + '.dat')
+            data_vector_path = os.path.join(data_path, 'data_vector/for_cosmo/xi_for_cosmo_tomo_{:}_{:}_withK_'.format(zbin1+1, zbin2+1) + data_sample + '.dat')
             theta, xip, xim = np.loadtxt(data_vector_path, unpack=True)
 
             # this assumes theta is the same for every tomographic bin and
@@ -50,7 +49,6 @@ def ReadDataVectorFunc(data, nzbins, nzcorrs):
     print('Loaded data vectors from: \n', os.path.join(data_path, 'data_vector/for_cosmo/'), '\n')
 
     return data
-
 
 
 def ReadCutValueFunc(data, nzbins, nzcorrs, theta_bins):
@@ -94,6 +92,7 @@ def ReadCutValueFunc(data, nzbins, nzcorrs, theta_bins):
 
     return mask, mask_indices, mask_suffix
 
+
 def ReadZdistribution(data, nzbins):
     """
     Read the dn/dz files
@@ -115,11 +114,8 @@ def ReadZdistribution(data, nzbins):
     hist_samples = []
     for zbin in range(nzbins):
 
-        # window_file_path = os.path.join(
-        #     data_path, 'redshift/' + sample_name + '/Nz_{0:}/Nz_{0:}_Mean/Nz_{0:}_z{1:}.asc'.format(nz_method, zbin_labels[zbin]))
-
         window_file_path = os.path.join(
-            data_path, 'KV450_COSMIC_SHEAR_DATA_RELEASE/REDSHIFT_DISTRIBUTIONS/Nz_{0:}/Nz_{0:}_Mean/Nz_{0:}_z{1:}.asc'.format(nz_method, zbin_labels[zbin]))
+            data_path, 'redshift/' + sample_name + '/Nz_{0:}/Nz_{0:}_Mean/Nz_{0:}_z{1:}.asc'.format(nz_method, zbin_labels[zbin]))
 
         if os.path.exists(window_file_path):
             zptemp, hist_pz = np.loadtxt(window_file_path, usecols=[0, 1], unpack=True)
@@ -135,8 +131,8 @@ def ReadZdistribution(data, nzbins):
 
         else:
             raise Exception("dn/dz file not found:\n %s"%window_file_path)
-    # print('Loaded redshift distributions from: \n', os.path.join(
-    #         data_path, 'redshift/' + sample_name + '/Nz_{0:}/Nz_{0:}_Mean/'.format(nz_method)), '\n')
+    print('Loaded redshift distributions from: \n', os.path.join(
+            data_path, 'redshift/' + sample_name + '/Nz_{0:}/Nz_{0:}_Mean/'.format(nz_method)), '\n')
 
     return np.asarray(z_samples), np.asarray(hist_samples), len(zptemp)
 
