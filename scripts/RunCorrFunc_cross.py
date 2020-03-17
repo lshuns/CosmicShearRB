@@ -136,7 +136,7 @@ for idx_z1 in range(ncorrbins):
         xis = np.dstack(xi_list)
         
         wg = 1./xis[:,7]**2. # the error for xi
-        for id_col in range(len(xi_out[:])):
+        for id_col in range(len(xi_out[0])):
             if (id_col != 7) and (id_col != 8) and (id_col != 9) and (id_col != 10):
                 # weight average for parameters
                 xi_out[:, id_col] = np.average(xis[:,id_col], axis=1, weights=wg)
