@@ -67,7 +67,6 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
     nzmax = z_samples.shape[1]
     # requires that z-spacing is always the same for all bins...
     z_p = z_samples[0, :]
-    print('Redshift integrations performed at resolution of redshift distribution histograms! \n')
 
     pz = np.zeros((nzmax, nzbins))
     pz_norm = np.zeros(nzbins)
@@ -105,6 +104,9 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
     print('Omega_m =', Omega_m)
     small_h = cosmo.h()
     print('h =', small_h)
+    # S8
+    print('S8 =', cosmo.sigma8()*(Omega_m/0.3)**0.5)
+
     # One wants to obtain here the relation between z and r, this is done
     # by asking the cosmological module with the function z_of_r
     r, dzdr = cosmo.z_of_r(z_p)
@@ -128,7 +130,6 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
     # define an array of thetas
     for it in range(nthetatot):
         theta[it] = thetamin * math.exp(data.const['dlntheta'] * it)
-
 
 
     ################################################################
@@ -162,7 +163,7 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
         while (ll*theta[-1]*a2r < data.const['dx_threshold']):
             ll += data.const['dx_below_threshold']/theta[-1]/a2r
             il += 1
-        for it  in range(nthetatot):
+        for it in range(nthetatot):
             while (ll*theta[nthetatot-1-it]*a2r < data.const['xmax']) and (ll+data.const['dx_above_threshold']/theta[nthetatot-1-it]/a2r < data.const['lmax']):
                 ll += data.const['dx_above_threshold']/theta[nthetatot-1-it]/a2r
                 il += 1
@@ -265,21 +266,22 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
         amp_IA = data.nuisance_parameters['A_IA']
         exp_IA = data.nuisance_parameters['exp_IA']
         intrinsic_alignment = True
+        print(f"Both A_IA ({amp_IA}) and exp_IA ({exp_IA}) are used for IA modelling.")
     elif ('A_IA' in data.nuisance_parameters) and ('exp_IA' not in data.nuisance_parameters):
         amp_IA = data.nuisance_parameters['A_IA']
         # redshift-scaling is turned off:
         exp_IA = 0.
-
         intrinsic_alignment = True
+        print(f"Only A_IA ({amp_IA}) is used for IA modelling.")
     else:
         intrinsic_alignment = False
+        print("IA is not modelling.")
 
     # get linear growth rate if IA are modelled:
     if intrinsic_alignment:
         rho_crit = RhoCriticalFunc(small_h)
         # derive the linear growth factor D(z)
         linear_growth_rate = np.zeros_like(z_p)
-        #print(redshifts)
         for index_z, z in enumerate(z_p):
             try:
                 # for CLASS ver >= 2.6:
@@ -314,7 +316,6 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
             fun = pr[nr:, Bin] * (r[nr:] - r[nr]) / r[nr:]
             g[nr, Bin] = np.sum(0.5 * (fun[1:] + fun[:-1]) * (r[nr + 1:] - r[nr:-1]))
             g[nr, Bin] *= 2. * r[nr] * (1. + z_p[nr])
-
 
 
     ################################################
@@ -403,7 +404,6 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
     # Interpolate Cl at values lll and store results in Cll
     for Bin in range(nzcorrs):
         Cll[Bin,:] = itp.splev(lll[:], spline_Cl[Bin])
-
 
 
     ################################################
@@ -524,16 +524,13 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
             xi[j + data.const['ntheta']:j + 2 * data.const['ntheta']] = itp.splev(theta_bins[:data.const['ntheta']], xi2_theta[Bin])
 
 
-
-
-
-
     ################################################
     # Shear bias
     ################################################
     # nuisance parameter for m-correction:
     dm_per_zbin = np.zeros((data.const['ntheta'], nzbins))
     if ('dm' in data.nuisance_parameters):
+        print("constant m-value is applied!")
         for zbin in range(nzbins):
             dm_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dm'][zbin]
 
@@ -541,9 +538,11 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
     dc1_per_zbin = np.zeros((data.const['ntheta'], nzbins))
     dc2_per_zbin = np.zeros((data.const['ntheta'], nzbins))
     if ('dc1' in data.nuisance_parameters):
+        print("constant c1-value is applied!")
         for zbin in range(nzbins):
             dc1_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dc1'][zbin]
     if ('dc2' in data.nuisance_parameters):
+        print("constant c2-value is applied!")
         for zbin in range(nzbins):
             dc2_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dc2'][zbin]
 
@@ -592,6 +591,7 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
         for zbin in range(nzbins):
             if ('Ac'in data.nuisance_parameters):
                 amps_cfunc[zbin] = data.nuisance_parameters['Ac']
+                print("Ac =", data.nuisance_parameters['Ac'], 'in zbin', zbin)
 
         index_corr = 0
         for zbin1 in range(nzbins):
