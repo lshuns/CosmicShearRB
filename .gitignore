@@ -8,6 +8,7 @@ __pycache__/
 *test*
 improvement.txt
 issues.txt
+nohup.out
 
 output/
 wornout/
