@@ -30,7 +30,7 @@ def ReadDataVectorFunc(data, nzbins, nzcorrs):
     for zbin1 in range(nzbins):
         for zbin2 in range(zbin1, nzbins):
 
-            data_vector_path = os.path.join(data_path, 'data_vector/for_cosmo/xi_for_cosmo_tomo_{:}_{:}_withK_'.format(zbin1+1, zbin2+1) + data_sample + '.dat')
+            data_vector_path = os.path.join(data_path, 'data_vector/for_cosmo/{:}/xi_for_cosmo_tomo_{:}_{:}_withK_{:}.dat'.format(data_sample, zbin1+1, zbin2+1, data_sample))
             theta, xip, xim = np.loadtxt(data_vector_path, unpack=True)
 
             # this assumes theta is the same for every tomographic bin and
@@ -46,7 +46,7 @@ def ReadDataVectorFunc(data, nzbins, nzcorrs):
 
     data = np.concatenate((data_xip, data_xim))
 
-    print('Loaded data vectors from: \n', os.path.join(data_path, 'data_vector/for_cosmo/'), '\n')
+    print('Loaded data vectors from: \n', os.path.join(data_path, 'data_vector/for_cosmo/{:}'.format(data_sample)), '\n')
 
     return data
 
@@ -178,7 +178,7 @@ def WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, vec, fn
     print('Saved vector in list format cut down to scales as specified in {:}: \n'.format(cutvalues_file), fname, '\n')
 
 
-def LoadCovarianceFunc(data, nzbins, nzcorrs, theta_bins, xi_theo):
+def LoadCovarianceFunc(data, nzbins, nzcorrs, xi_theo):
     """
     Read in the full covariance matrix and to bring it into format of self.xi_obs.
     """
@@ -199,52 +199,26 @@ def LoadCovarianceFunc(data, nzbins, nzcorrs, theta_bins, xi_theo):
         tmp_raw = np.loadtxt(fname)
 
         print('Loaded covariance matrix in list format from: \n', fname)
-        print('Now we construct the covariance matrix in a format usable for the first time. \n This might take a few minutes, but only once! \n')
-
-        thetas_plus = theta_bins[:ntheta]
-        thetas_minus = theta_bins[ntheta:]
+        print('Now we construct the covariance matrix in a format usable for the first time.')
 
         indices = np.column_stack((tmp_raw[:, :3], tmp_raw[:, 4:7]))
 
         # we need to add both components for full covariance
         values = tmp_raw[:, 8] + tmp_raw[:, 9]
 
-        for i in range(len(tmp_raw)):
-            for j in range(ntheta):
-                if np.abs(tmp_raw[i, 3] - thetas_plus[j]) <= tmp_raw[i, 3] / 10.:
-                    tmp_raw[i, 3] = j
-                if np.abs(tmp_raw[i, 7] - thetas_plus[j]) <= tmp_raw[i, 7] / 10.:
-                    tmp_raw[i, 7] = j
-
-        thetas_raw_plus = tmp_raw[:, 3].astype(np.int16)
-        thetas_raw_minus = tmp_raw[:, 7].astype(np.int16)
-
         dim = 2 * ntheta * nzcorrs
         matrix = np.zeros((dim, dim))
 
-        # ugly brute-force...
-        index1 = 0
+        # make sure the list covariance is in right order:
+        # theta -> PorM -> iz2 -> iz1
+        index_lin = 0
         # this creates the correctly ordered (i.e. like self.xi_obs) full
-        # 180 x 180 covariance matrix:
-        for iz1 in range(nzbins):
-            for iz2 in range(iz1, nzbins):
-                for ipm in range(2):
-                    for ith in range(ntheta):
-
-                        index2 = 0
-                        for iz3 in range(nzbins):
-                            for iz4 in range(iz3, nzbins):
-                                for ipm2 in range(2):
-                                    for ith2 in range(ntheta):
-                                        for index_lin in range(len(tmp_raw)):
-                                            #print(index1, index2)
-                                            #print(iz1, iz2, ipm, ith, iz3, iz4, ipm2)
-                                            if iz1 + 1 == indices[index_lin, 0] and iz2 + 1 == indices[index_lin, 1] and ipm == indices[index_lin, 2] and iz3 + 1 == indices[index_lin, 3]  and iz4 + 1 == indices[index_lin, 4] and ipm2 == indices[index_lin, 5] and ith == thetas_raw_plus[index_lin] and ith2 == thetas_raw_minus[index_lin]:
-                                                #print('hit')
-                                                matrix[index1, index2] = values[index_lin]
-                                                matrix[index2, index1] = matrix[index1, index2]
-                                        index2 += 1
-                        index1 += 1
+        # 270 x 270 covariance matrix:
+        for index1 in range(dim):
+            for index2 in range(index1, dim):
+                matrix[index1, index2] = values[index_lin]
+                matrix[index2, index1] = matrix[index1, index2]
+                index_lin += 1
 
         # apply propagation of m-correction uncertainty following
         # equation 12 from Hildebrandt et al. 2017 (arXiv:1606.05338):
