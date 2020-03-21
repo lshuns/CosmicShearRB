@@ -266,13 +266,13 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
         amp_IA = data.nuisance_parameters['A_IA']
         exp_IA = data.nuisance_parameters['exp_IA']
         intrinsic_alignment = True
-        print(f"Both A_IA ({amp_IA}) and exp_IA ({exp_IA}) are used for IA modelling.")
+        print("Both A_IA ({0:}) and exp_IA ({1:}) are used for IA modelling.".format(amp_IA, exp_IA))
     elif ('A_IA' in data.nuisance_parameters) and ('exp_IA' not in data.nuisance_parameters):
         amp_IA = data.nuisance_parameters['A_IA']
         # redshift-scaling is turned off:
         exp_IA = 0.
         intrinsic_alignment = True
-        print(f"Only A_IA ({amp_IA}) is used for IA modelling.")
+        print("Only A_IA ({:}) is used for IA modelling.".format(amp_IA))
     else:
         intrinsic_alignment = False
         print("IA is not modelling.")
@@ -609,7 +609,7 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
 
     # write out masked theory vector in list format:    
     if save_theory_vector:
-        io_cs.WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, xi, data.conf['sample'])
+        io_cs.WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, xi, data.conf['out_suffix'])
         print('Predicted vector saved.')
     
     return xi_obs, xi, theta_bins, mask
