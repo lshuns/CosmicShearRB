@@ -22,6 +22,7 @@ import math
 
 import io_cs
 
+OUTPATH = '/disks/shear15/ssli/CosmicShear/data_vector/test/output/'
 
 def CSsignalFunc(data, cosmo, save_theory_vector=False):
     """
@@ -73,6 +74,7 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
     for zbin in range(nzbins):
         # redshift offset
         param_name = 'D_z{:}'.format(zbin + 1)
+        print("D_z{:} = {:}".format(zbin+1, data.nuisance_parameters['D_z'][param_name]))
         z_mod = z_p + data.nuisance_parameters['D_z'][param_name]
         # the artificial zero-point is not included for spline
         spline_pz = itp.interp1d(z_samples[zbin, 1:], hist_samples[zbin, 1:], kind=data.conf['type_redshift_interp'])
@@ -84,7 +86,6 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
         # Normalize selection functions
         dz = z_p[1:] - z_p[:-1]
         pz_norm[zbin] = np.sum(0.5 * (pz[1:, zbin] + pz[:-1, zbin]) * dz)
-
 
     #####################################################################
     # CLASS cosmo initialization
@@ -111,7 +112,6 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
     # by asking the cosmological module with the function z_of_r
     r, dzdr = cosmo.z_of_r(z_p)
 
-
     ################################################
     # discrete theta values (to convert C_l to xi's)
     ################################################
@@ -121,6 +121,25 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
     else:
         thetamin = np.min(theta_bins) * 0.8
         thetamax = np.max(theta_bins) * 1.2
+
+    if data.conf['integrate_Bessel_with'] == 'fftlog':
+        try:
+            import pycl2xi.fftlog as fftlog
+
+        except:
+            print('FFTLog was requested as integration method for the Bessel functions but is not installed. \n Download it from "https://github.com/tilmantroester/pycl2xi" and follow the installation instructions there (also requires the fftw3 library). \n Aborting run now... \n')
+            exit()
+
+        Cl2xi = fftlog.Cl2xi
+
+    if data.conf['integrate_Bessel_with'] == 'brute_force':
+        # we redefine these settings so that lll for Bessel integration corresponds
+        # to range that was used when comparing to CCL
+        data.const['xmax'] = 100.
+        data.const['dx_below_threshold'] = 0.02
+        data.const['dx_above_threshold'] = 0.07
+        data.const['dx_threshold'] = 0.2
+        data.const['dlntheta'] = 0.12
 
     nthetatot = np.ceil(math.log(thetamax / thetamin) / data.const['dlntheta']) + 1
     nthetatot = np.int32(nthetatot)
@@ -190,15 +209,6 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
             ldl[il]=lll[il]*0.5*(lll[il+1]-lll[il-1])
         ldl[-1]=lll[-1]*0.5*(lll[-1]-lll[-2])
     else:
-        try:
-            import pycl2xi.fftlog as fftlog
-        except:
-            print('FFTLog was requested as integration method for the Bessel functions but is not installed. \n Download it from "https://github.com/tilmantroester/pycl2xi" and follow the installation instructions there (also requires the fftw3 library). \n Aborting run now... \n')
-            exit()
-
-        # this has to be declared a self, otherwise fftlog won't be available
-        Cl2xi = fftlog.Cl2xi
-
         # this is sufficient (FFTLog only uses 5k points internally anyways...)
         ell_lin = np.arange(1., 501., 1)
         ell_log = np.logspace(np.log10(501.), np.log10(data.const['lmax']), 5000 - len(ell_lin))
@@ -405,7 +415,6 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
     for Bin in range(nzcorrs):
         Cll[Bin,:] = itp.splev(lll[:], spline_Cl[Bin])
 
-
     ################################################
     # shear correlation function
     ################################################    
@@ -541,11 +550,12 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
         print("constant c1-value is applied!")
         for zbin in range(nzbins):
             dc1_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dc1'][zbin]
+            print("c1-value {:} for bin {:}".format(data.nuisance_parameters['dc1'][zbin], zbin+1))
     if ('dc2' in data.nuisance_parameters):
         print("constant c2-value is applied!")
         for zbin in range(nzbins):
             dc2_per_zbin[:, zbin] = np.ones(data.const['ntheta']) * data.nuisance_parameters['dc2'][zbin]
-
+            print("c2-value {:} for bin {:}".format(data.nuisance_parameters['dc2'][zbin], zbin+1))
     # correlate dc1/2_per_zbin in tomographic order of xi1/2:
     dc1_sqr = np.zeros((data.const['ntheta'], nzcorrs))
     dc2_sqr = np.zeros((data.const['ntheta'], nzcorrs))
