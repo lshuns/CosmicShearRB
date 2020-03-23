@@ -54,6 +54,6 @@ def initialise(paths):
     sys.path.insert(1, classy_path)
     import classy
     cosmo = classy.Class()
-    # print(classy.__file__)
+    print('classy location', classy.__file__)
 
     return cosmo, data
