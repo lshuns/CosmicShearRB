@@ -16,7 +16,7 @@ import CosmicShear
 
 OUTPATH = '/disks/shear15/ssli/CosmicShear/data_vector/test/output/'
 
-def Chi2SingleFunc(nzbins, nzcorrs, theta_bins, mask, data, xi_obs, xi_theo):
+def Chi2SingleFunc(nzbins, nzcorrs, theta_bins, mask, data, xi_obs, xi_theo, DISCARD_POINT=False):
     """
     Estimate chi^2 for one data vector
     """
@@ -35,6 +35,15 @@ def Chi2SingleFunc(nzbins, nzcorrs, theta_bins, mask, data, xi_obs, xi_theo):
 
     vec = xi_theo[mask_indices] - xi_obs[mask_indices]
 
+    # discard one point at a time
+    if DISCARD_POINT:
+        chi2s = []
+        for i in range(len(vec)):
+            vec_dis = np.copy(vec)
+            vec_dis[i] = 0
+            yt = solve_triangular(cholesky_transform, vec_dis, lower=True)
+            chi2s.append(yt.dot(yt))
+        return np.array(chi2s)
     yt = solve_triangular(cholesky_transform, vec, lower=True)
     chi2 = yt.dot(yt)
 
