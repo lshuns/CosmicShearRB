@@ -141,8 +141,8 @@ for kk in range(len(inpathFs)):
                 c_term['e1_ave_b'], c_term['e1_err_b'], c_term['e2_ave_b'], c_term['e2_err_b'], 
                 sep=',', file=log_c)
 
-            tmp['bias_corrected_e1'] -= c_term['e1_ave'] 
-            tmp['bias_corrected_e2'] -= c_term['e2_ave']
+            tmp['bias_corrected_e1'] -= c_term['e1_ave_b'] 
+            tmp['bias_corrected_e2'] -= c_term['e2_ave_b']
 
             data = tmp
             
