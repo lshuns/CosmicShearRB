@@ -110,8 +110,8 @@ def TomoBinFunc(indata, z_col, zbins_min, zbins_max,
     """
 
     for i in range(len(zbins_min)):
-        zmin = zbins_min[i]
-        zmax = zbins_max[i]
+        zmin = zbins_min[i] + 0.001
+        zmax = zbins_max[i] + 0.001
         indataBin = indata[(indata[z_col] > zmin) & (indata[z_col] <= zmax)]
         #
         outpath = outdir + save_name_prefix + '_tomo' + str(i+1) + '.feather'
