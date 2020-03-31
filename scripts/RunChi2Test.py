@@ -13,6 +13,8 @@ Please modify necessary configurations in Cosmo/cosmic_shear_signal/input
 
 import time
 
+import numpy as np
+
 import os
 import sys
 # Self-defined package
@@ -32,9 +34,12 @@ paths['data'] = '/disks/shear15/ssli/CosmicShear'
 paths['param'] =  '/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/CosmicShearRB/Cosmo/cosmic_shear_signal/input'
 
 
+# name_param_file = 'kv450_cf_best.param'
+# name_param_file = 'kv450_cf_mean.param'
+name_param_file = 'kv450_cf_Planck.param'
+
 # ++++++++++++++++++++++++++++++++++++++++++ whole
 # name of parameter/configure files
-name_param_file = 'kv450_cf_best.param'
 name_conf_file = 'kv450_cf.conf'
 
 # Initialisation
@@ -61,7 +66,6 @@ print("dof_whole", dof_whole)
 
 # ++++++++++++++++++++++++++++++++++++++++++ red
 # name of parameter/configure files
-name_param_file = 'kv450_cf_best.param'
 name_conf_file = 'kv450_cf_red.conf'
 
 # Initialisation
@@ -89,7 +93,6 @@ print("dof_red", dof_red)
 
 # ++++++++++++++++++++++++++++++++++++++++++ blue
 # name of parameter/configure files
-name_param_file = 'kv450_cf_best.param'
 name_conf_file = 'kv450_cf_blue.conf'
 
 # Initialisation
@@ -116,15 +119,23 @@ print("chi2_blue", chi2_blue)
 print("dof_blue", dof_blue)
 
 
-# # # ++++++++++++++++++++++++++++++++++++++++++++ red - blue
-# # chi2_rb, dof_rb = Chi2Test.Chi2CoupleFunc(nzbins, nzcorrs, theta_bins_red, mask_red, mask_blue, data_red, data_blue, xi_obs_red, xi_obs_blue, xi_theo_red, xi_theo_blue)
-# # print("chi2_red_blue", chi2_rb)
-# # print("dof_red_blue", dof_rb)
-# # print("chi2_reduced_red_blue", chi2_rb/(dof_rb-1))
+# ++++++++++++++++++++++++++++++++++++++++++++ red - blue
+inDir_cov12 = '/disks/shear15/ssli/CosmicShear/covariance'
+file_name_cov12 = 'thps_cov_mar11_usable_br.dat'
+ntheta = 9
+# check the mask is the same
+if np.array_equal(mask_red, mask_blue):
+    chi2_br, dof_br = Chi2Test.Chi2CoupleDiffFunc(nzbins, nzcorrs, ntheta, mask_red,
+                            data_blue, xi_obs_blue, xi_theo_blue,
+                            data_red, xi_obs_red, xi_theo_red,
+                            inDir_cov12, file_name_cov12)
+    print("chi2_blue_red", chi2_br)
+    print("dof_blue_red", dof_br)
+else:
+    print("Something wrong with the mask!")
 
-
-# print("All finished in", time.time()-Start)
-# # ('All finished in', 25.485830068588257) (covariance matrix in list form)
+print("All finished in", time.time()-Start)
+# ('All finished in', 25.485830068588257) (covariance matrix in list form)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++ old
@@ -199,6 +210,10 @@ print("dof_blue", dof_blue)
 # +++++ IA = 0
 # chi2_whole 182.18528673318514
 # dof_whole 195
+# +++++ mean KV450 values
+# chi2_whole 186.6469440889119
+# +++++ Planck values
+# chi2_whole 197.15775145270865
 
 # ########### red
 # +++++ IA = best value
@@ -207,7 +222,10 @@ print("dof_blue", dof_blue)
 # +++++ IA = 0
 # chi2_red 157.9054310819387
 # dof_red 195
-
+# +++++ mean KV450 values
+# chi2_red 158.70514127432648
+# +++++ Planck values
+# chi2_red 162.94534120660316
 
 # ########### blue
 # +++++ IA = best value
@@ -216,4 +234,20 @@ print("dof_blue", dof_blue)
 # +++++ IA = 0
 # chi2_blue 179.45973994197797
 # dof_blue 195
+# +++++ mean KV450 values
+# chi2_blue 186.7343894369092
+# +++++ Planck values
+# chi2_blue 200.86952530128653
+
+# ########## blue-red
+# +++++ IA = best value
+# chi2_blue_red 175.57548773807528
+# dof_blue_red 195
+# +++++ IA = 0
+# chi2_blue_red 176.13607482251632
+# dof_blue_red 195
+# +++++ mean KV450 values
+# chi2_blue_red 176.81964188989852
+# +++++ Planck values
+# chi2_blue_red 179.9253175222906
 

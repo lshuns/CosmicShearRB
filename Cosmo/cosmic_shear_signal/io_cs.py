@@ -226,9 +226,52 @@ def LoadCovarianceFunc(data, nzbins, nzcorrs, xi_theo):
         matrix_m_corr = np.matrix(xi_theo).T * np.matrix(xi_theo) * 4. * err_multiplicative_bias**2
         matrix = matrix + np.asarray(matrix_m_corr)
 
-        fname = fname = os.path.join(data_path, 'covariance/'+usable_file)
+        fname = os.path.join(data_path, 'covariance/'+usable_file)
         if not os.path.isfile(fname):
             np.savetxt(fname, matrix)
             print('Saved covariance matrix (incl. shear calibration uncertainty) in format usable with this likelihood to: \n', fname, '\n')
+
+    return matrix
+
+
+def LoadCrossCovarianceFunc(inDir, file_name, ntheta, nzbins, nzcorrs):
+    """
+    Read in the full cross-covariance matrix and to bring it into format of self.xi_obs.
+    """
+
+    fname = os.path.join(inDir, file_name)
+
+    if 'usable' in file_name:
+        matrix = np.loadtxt(fname)
+        print('Loaded covariance matrix in a format usable from: \n', fname, '\n')
+
+    else:
+        tmp_raw = np.loadtxt(fname)
+
+        print('Loaded covariance matrix in list format from: \n', fname)
+        print('Now we construct the covariance matrix in a format usable for the first time.')
+
+        indices = np.column_stack((tmp_raw[:, :3], tmp_raw[:, 4:7]))
+
+        # we need to add both components for full covariance
+        values = tmp_raw[:, 8] + tmp_raw[:, 9]
+
+        dim = 2 * ntheta * nzcorrs
+        matrix = np.zeros((dim, dim))
+
+        # make sure the list covariance is in right order:
+        # theta -> PorM -> iz2 -> iz1
+        index_lin = 0
+        # this creates the correctly ordered (i.e. like self.xi_obs) full
+        # 270 x 270 covariance matrix:
+        for index1 in range(dim):
+            for index2 in range(dim):
+                matrix[index1, index2] = values[index_lin]
+                index_lin += 1
+
+        fname = os.path.join(inDir, file_name.replace("list", 'usable'))
+        if not os.path.isfile(fname):
+            np.savetxt(fname, matrix)
+            print('Saved covariance matrix in format usable with this likelihood to: \n', fname, '\n')
 
     return matrix

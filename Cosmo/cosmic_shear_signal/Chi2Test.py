@@ -51,27 +51,28 @@ def Chi2SingleFunc(nzbins, nzcorrs, theta_bins, mask, data, xi_obs, xi_theo, DIS
 
 
 
-# cannot work due to cholesky problem
-def Chi2CoupleFunc(nzbins, nzcorrs, theta_bins, mask1, mask2, data1, data2, xi_obs_1, xi_obs_2, xi_theo_1, xi_theo_2):
+def Chi2CoupleDiffFunc(nzbins, nzcorrs, ntheta, mask,
+                        data1, xi_obs_1, xi_theo_1,
+                        data2, xi_obs_2, xi_theo_2,
+                        inDir_cov12, file_name_cov12):
     """
-    Estimate chi^2 for coupled data vectors
+    Estimate chi^2 for difference between two data vectors
     Note: this assumes two data vectors have two separated covariance matrices
-        the cross-correlation between two data vectors is ignored
+        the cross-correlation between two data vectors is also desired
+        the masks for two data vector need to be identical
     """
 
     # load the full covariance matrix:
     covmat_block_1 = io_cs.LoadCovarianceFunc(data1, nzbins, nzcorrs, xi_theo_1)
     covmat_block_2 = io_cs.LoadCovarianceFunc(data2, nzbins, nzcorrs, xi_theo_2)
 
-    covmat_block_zero = np.ones_like(covmat_block_1)
+    covmat_block_12 = io_cs.LoadCrossCovarianceFunc(inDir_cov12, file_name_cov12, ntheta, nzbins, nzcorrs)
+    
 
-    # build a combined cov-mat, for that to work we assume, that the cov-mat dimension fits
-    # to the size of the *uncut*, single data-vector and is ordered in the same way as the
-    # *final* data-vector created (i.e. vec = [xi+(1,1), xi-(1,1), xi+(1,2), xi-(1,2),...]!
-    covmat = np.asarray(np.bmat('covmat_block_1, covmat_block_zero; covmat_block_2, covmat_block_zero'))
+    # build a combined cov-mat
+    covmat = covmat_block_1 + covmat_block_2 - covmat_block_12 - covmat_block_12.transpose()
 
     # trim covariance matrix to chosen scales:
-    mask = np.concatenate((mask1, mask2))
     mask_indices = np.where(mask == 1)[0]
     covmat = covmat[np.ix_(mask_indices, mask_indices)]
 
@@ -80,7 +81,7 @@ def Chi2CoupleFunc(nzbins, nzcorrs, theta_bins, mask1, mask2, data1, data2, xi_o
     # use the Cholesky decomposition instead:
     cholesky_transform = cholesky(covmat, lower=True)
 
-    vec = np.concatenate((xi_theo_1, xi_theo_2))[mask_indices] - np.concatenate((xi_obs_1, xi_obs_2))[mask_indices]
+    vec = (xi_theo_1[mask_indices] - xi_obs_1[mask_indices]) - (xi_theo_2[mask_indices] - xi_obs_2[mask_indices])
     
     yt = solve_triangular(cholesky_transform, vec, lower=True)
     chi2 = yt.dot(yt)
