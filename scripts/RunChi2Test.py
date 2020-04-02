@@ -144,8 +144,6 @@ print("chi2_blue_red", chi2_br)
 print("All finished in", time.time()-Start)
 # ('All finished in', 25.485830068588257) (covariance matrix in list form)
 
-chi2_blue_red 181.72856546228772
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 2020-04-02
 # All finished in 24.952291250228882
@@ -183,7 +181,7 @@ chi2_blue_red 181.72856546228772
 # +++ mean KV450
 # chi2_blue 187.62772845975311
 # +++ Planck
-chi2_blue 202.74030188552254
+# chi2_blue 202.74030188552254
 
 # ########### blue-red
 # +++ best KV450
@@ -195,7 +193,7 @@ chi2_blue 202.74030188552254
 # +++ mean KV450
 # chi2_blue_red 178.08327855721166
 # +++ Planck
-
+# chi2_blue_red 181.72856546228772
 
 
 
