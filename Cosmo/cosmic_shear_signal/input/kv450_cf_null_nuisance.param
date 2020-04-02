@@ -1,34 +1,45 @@
-# Fiducial results reported in KV450 paper (arXiv:1812.06076) Table 4.
-
+# Maximum-likelihood results extracted from public mcmc chain
 # ++++++++++++++++++ Cosmological parameters:
 
 # CDM density (omega_cdm * h^2)
-data.cosmo_arguments['omega_cdm']    = 0.118
+data.cosmo_arguments['omega_cdm']    = 5.74881700e-02
 
 # Scalar spectrum amplitude
-data.cosmo_arguments['ln10^{10}A_s'] = 3.158
+data.cosmo_arguments['ln10^{10}A_s'] = 4.69733100e+00
 
 # Baryon density (omega_b * h^2)
-data.cosmo_arguments['omega_b']      = 0.022
+data.cosmo_arguments['omega_b']      = 2.19527000e-02
 
 # Scalar spectral index
-data.cosmo_arguments['n_s']          = 1.021
+data.cosmo_arguments['n_s']          = 1.12807100e+00
 
 # Hubble parameter
-data.cosmo_arguments['h']            = 0.745
+data.cosmo_arguments['h']            = 7.80130100e-01
+
+## METHOD FOR NON-LINEAR CORRECTIONS ##
+# choose the method for calculation of non-linear corrections, any CLASS keyword
+# is possible, but the default choices are
+# 1) 'halofit' (including Takahashi's update) and
+# 2) 'hmcode' (Mead et al. 2015, 2016)
+# the choice between the two affects also the choice of the baryon feedback
+# modelling further below!
+# for fiducial KV450 analysis: 'hmcode'
+data.cosmo_arguments['non linear']   = 'hmcode'
 
 # Baryon feedback amplitude ('hmcode'):
-data.cosmo_arguments['non linear']   = 'hmcode'
-data.cosmo_arguments['c_min']        = 2.484
+data.cosmo_arguments['c_min']        = 2.18854200e+00
 
 
 # ++++++++++++++++ Derived parameters:
 
 # Matter density
-#['Omega_m']      = 0.256
+#['Omega_m']      = 1.31588400e-01
 
 # Power spectrum amplitude
-#['sigma8']       = 0.836
+#['sigma8']       = 1.16563400e+00
+
+# S8
+#['S8']      = 7.71987703e-01
 
 # ++++++++++++++++ Other cosmo parameters (fixed parameters, precision parameters, etc.)
 
@@ -60,17 +71,16 @@ data.cosmo_arguments['k_pivot'] = 0.05
 # +++++++++++++++++ Nuisance parameters:
 
 # Intrinsic alignments (IA) amplitude:
-data.nuisance_parameters['A_IA'] = 0.981
-#data.nuisance_parameters['A_IA'] = 0.0
+data.nuisance_parameters['A_IA'] = 0
 
 # m-term
 #data.nuisance_parameters['dm'] = [0., 0., 0., 0., 0.]
 
 # Constant c-term offset
-#data.nuisance_parameters['dc1'] = [0., 0., 0., 0., 0.]
+data.nuisance_parameters['dc1'] = [0., 0., 0., 0., 0.]
 #data.nuisance_parameters['dc2'] = [0., 0., 0., 0., 0.]
 # 2D c-term amplitude
-data.nuisance_parameters['Ac'] = 1.022
+data.nuisance_parameters['Ac'] = 1.
 
 # Redshift offset
-data.nuisance_parameters['D_z'] = {'D_z1': -0.007, 'D_z2': -0.010, 'D_z3': 0.013, 'D_z4': 0.001, 'D_z5': -0.001}
+data.nuisance_parameters ['D_z'] = {'D_z1': 0, 'D_z2': 0, 'D_z3': 0, 'D_z4': 0, 'D_z5': 0}

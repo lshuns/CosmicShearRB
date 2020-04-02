@@ -2,19 +2,19 @@
 # ++++++++++++++++++ Cosmological parameters:
 
 # CDM density (omega_cdm * h^2)
-data.cosmo_arguments['omega_cdm']    = 5.74881700e-02
+data.cosmo_arguments['omega_cdm']    = 0.12029
 
 # Scalar spectrum amplitude
-data.cosmo_arguments['ln10^{10}A_s'] = 4.69733100e+00
+data.cosmo_arguments['ln10^{10}A_s'] = 3.098
 
 # Baryon density (omega_b * h^2)
-data.cosmo_arguments['omega_b']      = 2.19527000e-02
+data.cosmo_arguments['omega_b']      = 0.022068
 
 # Scalar spectral index
-data.cosmo_arguments['n_s']          = 1.12807100e+00
+data.cosmo_arguments['n_s']          = 0.9624
 
 # Hubble parameter
-data.cosmo_arguments['h']            = 7.80130100e-01
+data.cosmo_arguments['h']            = 0.6711
 
 ## METHOD FOR NON-LINEAR CORRECTIONS ##
 # choose the method for calculation of non-linear corrections, any CLASS keyword
@@ -71,8 +71,7 @@ data.cosmo_arguments['k_pivot'] = 0.05
 # +++++++++++++++++ Nuisance parameters:
 
 # Intrinsic alignments (IA) amplitude:
-#data.nuisance_parameters['A_IA'] = 4.94014400e-01
-data.nuisance_parameters['A_IA'] = 0
+data.nuisance_parameters['A_IA'] = 4.94014400e-01
 
 # m-term
 #data.nuisance_parameters['dm'] = [0., 0., 0., 0., 0.]
