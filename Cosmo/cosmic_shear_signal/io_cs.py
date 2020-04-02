@@ -234,7 +234,7 @@ def LoadCovarianceFunc(data, nzbins, nzcorrs, xi_theo):
     return matrix
 
 
-def LoadCrossCovarianceFunc(inDir, file_name, ntheta, nzbins, nzcorrs):
+def LoadCrossCovarianceFunc(inDir, file_name, ntheta, nzbins, nzcorrs, xi_theo1=None, xi_theo2=None):
     """
     Read in the full cross-covariance matrix and to bring it into format of self.xi_obs.
     """
@@ -268,6 +268,12 @@ def LoadCrossCovarianceFunc(inDir, file_name, ntheta, nzbins, nzcorrs):
             for index2 in range(dim):
                 matrix[index1, index2] = values[index_lin]
                 index_lin += 1
+
+        # apply propagation of m-correction uncertainty following
+        # equation 12 from Hildebrandt et al. 2017 (arXiv:1606.05338):
+        err_multiplicative_bias = 0.02
+        matrix_m_corr = np.matrix(xi_theo1).T * np.matrix(xi_theo2) * 4. * err_multiplicative_bias**2
+        matrix = matrix + np.asarray(matrix_m_corr)
 
         fname = os.path.join(inDir, file_name.replace("list", 'usable'))
         if not os.path.isfile(fname):
