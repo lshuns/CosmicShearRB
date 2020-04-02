@@ -66,7 +66,7 @@ def Chi2CoupleDiffFunc(nzbins, nzcorrs, ntheta, mask,
     covmat_block_1 = io_cs.LoadCovarianceFunc(data1, nzbins, nzcorrs, xi_theo_1)
     covmat_block_2 = io_cs.LoadCovarianceFunc(data2, nzbins, nzcorrs, xi_theo_2)
 
-    covmat_block_12 = io_cs.LoadCrossCovarianceFunc(inDir_cov12, file_name_cov12, ntheta, nzbins, nzcorrs)
+    covmat_block_12 = io_cs.LoadCrossCovarianceFunc(inDir_cov12, file_name_cov12, ntheta, nzbins, nzcorrs, xi_theo_1, xi_theo_2)
     
 
     # build a combined cov-mat
