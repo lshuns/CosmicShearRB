@@ -12,7 +12,7 @@ Get the number of pairs in correlation function calculation
 import numpy as np
 
 inpathF = "/disks/shear15/ssli/CosmicShear/data_vector/cross_subsamples/xi_blue_red_tomo_"
-outpath = "/disks/shear15/ssli/CosmicShear/data_vector/cross_subsamples/npairs_blue_red_all.dat"
+outpath = "/disks/shear15/ssli/CosmicShear/covariance/prepare/npairs_blue_red_all.dat"
 
 nzbin = 10
 ntheta = 9

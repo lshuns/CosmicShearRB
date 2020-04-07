@@ -15,7 +15,7 @@ z_min = ['0.1', '0.3', '0.5', '0.7', '0.9']
 z_max = ['0.3', '0.5', '0.7', '0.9', '1.2']
 
 inpathF = '/disks/shear15/ssli/CosmicShear/redshift/red_blue_renamed/Nz_DIR_z'
-outDir = '/disks/shear15/ssli/CosmicShear/redshift/red_blue_renamed/'
+outDir = '/disks/shear15/ssli/CosmicShear/covariance/prepare/'
 data = []
 for i in range(len(z_min)):
     fname_b = inpathF + z_min[i] + 't' + z_max[i] + '_greater3.asc'
