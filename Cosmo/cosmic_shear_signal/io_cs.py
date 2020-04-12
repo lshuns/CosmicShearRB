@@ -275,7 +275,7 @@ def LoadCrossCovarianceFunc(inDir, file_name, ntheta, nzbins, nzcorrs, xi_theo1=
         matrix_m_corr = np.matrix(xi_theo1).T * np.matrix(xi_theo2) * 4. * err_multiplicative_bias**2
         matrix = matrix + np.asarray(matrix_m_corr)
 
-        fname = os.path.join(inDir, file_name.replace("list", 'usable'))
+        fname = os.path.join(inDir, file_name.replace("list", 'inc_m_usable'))
         if not os.path.isfile(fname):
             np.savetxt(fname, matrix)
             print('Saved covariance matrix in format usable with this likelihood to: \n', fname, '\n')
