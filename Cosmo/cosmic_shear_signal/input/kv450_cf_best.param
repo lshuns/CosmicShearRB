@@ -71,8 +71,8 @@ data.cosmo_arguments['k_pivot'] = 0.05
 # +++++++++++++++++ Nuisance parameters:
 
 # Intrinsic alignments (IA) amplitude:
-#data.nuisance_parameters['A_IA'] = 4.94014400e-01
-data.nuisance_parameters['A_IA'] = 0
+data.nuisance_parameters['A_IA'] = 4.94014400e-01
+#data.nuisance_parameters['A_IA'] = 0
 
 # m-term
 #data.nuisance_parameters['dm'] = [0., 0., 0., 0., 0.]
