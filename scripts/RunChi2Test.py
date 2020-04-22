@@ -34,36 +34,36 @@ paths['data'] = '/disks/shear15/ssli/CosmicShear'
 paths['param'] =  '/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/CosmicShearRB/Cosmo/cosmic_shear_signal/input'
 
 
-# name_param_file = 'kv450_cf_best.param'
+name_param_file = 'kv450_cf_best.param'
 # name_param_file = 'kv450_cf_null_nuisance.param'
 # name_param_file = 'kv450_cf_mean.param'
-name_param_file = 'kv450_cf_Planck.param'
+# name_param_file = 'kv450_cf_Planck.param'
 
-# ++++++++++++++++++++++++++++++++++++++++++ whole
-# name of parameter/configure files
-name_conf_file = 'kv450_cf.conf'
+# # ++++++++++++++++++++++++++++++++++++++++++ whole
+# # name of parameter/configure files
+# name_conf_file = 'kv450_cf.conf'
 
-# Initialisation
-# class: data and cosmo created
-cosmo, data_whole = initialise.initialise(paths)
-# data filled with input files
-# parameter file (with cosmological and nuisance parameters)
-data_whole.read_file(name_param_file, 'data', field='', separate=False)
-# configure file (with configure and hardly changed setting parameters)
-data_whole.read_file(name_conf_file, 'data', field='', separate=False)
+# # Initialisation
+# # class: data and cosmo created
+# cosmo, data_whole = initialise.initialise(paths)
+# # data filled with input files
+# # parameter file (with cosmological and nuisance parameters)
+# data_whole.read_file(name_param_file, 'data', field='', separate=False)
+# # configure file (with configure and hardly changed setting parameters)
+# data_whole.read_file(name_conf_file, 'data', field='', separate=False)
 
-# cosmic shear signal calculation
-xi_obs_whole, xi_theo_whole, theta_bins_whole, mask_whole = CosmicShear.CSsignalFunc(data_whole, cosmo, False)
+# # cosmic shear signal calculation
+# xi_obs_whole, xi_theo_whole, theta_bins_whole, mask_whole = CosmicShear.CSsignalFunc(data_whole, cosmo, False)
 
-# chi2 
-# Number of bins
-nzbins = len(data_whole.const['z_bins_min'])
-# Number of correlation
-nzcorrs = int(nzbins * (nzbins + 1) / 2)
-#
-chi2_whole, dof_whole = Chi2Test.Chi2SingleFunc(nzbins, nzcorrs, theta_bins_whole, mask_whole, data_whole, xi_obs_whole, xi_theo_whole)
-# print("chi2_whole", chi2_whole)
-# print("dof_whole", dof_whole)
+# # chi2 
+# # Number of bins
+# nzbins = len(data_whole.const['z_bins_min'])
+# # Number of correlation
+# nzcorrs = int(nzbins * (nzbins + 1) / 2)
+# #
+# chi2_whole, dof_whole = Chi2Test.Chi2SingleFunc(nzbins, nzcorrs, theta_bins_whole, mask_whole, data_whole, xi_obs_whole, xi_theo_whole)
+# # print("chi2_whole", chi2_whole)
+# # print("dof_whole", dof_whole)
 
 # ++++++++++++++++++++++++++++++++++++++++++ red
 # name of parameter/configure files
@@ -79,7 +79,7 @@ data_red.read_file(name_param_file, 'data', field='', separate=False)
 data_red.read_file(name_conf_file, 'data', field='', separate=False)
 
 # cosmic shear signal calculation
-xi_obs_red, xi_theo_red, theta_bins_red, mask_red = CosmicShear.CSsignalFunc(data_red, cosmo, False)
+xi_obs_red, xi_theo_red, theta_bins_red, mask_red = CosmicShear.CSsignalFunc(data_red, cosmo, save_theory_vector=False)
 # xi_obs_red, xi_theo_red, theta_bins_red, mask_red = CosmicShear.CSsignalFunc(data_red, cosmo, True)
 
 # chi2 
@@ -106,7 +106,7 @@ data_blue.read_file(name_param_file, 'data', field='', separate=False)
 data_blue.read_file(name_conf_file, 'data', field='', separate=False)
 
 # cosmic shear signal calculation
-xi_obs_blue, xi_theo_blue, theta_bins_blue, mask_blue = CosmicShear.CSsignalFunc(data_blue, cosmo, False)
+xi_obs_blue, xi_theo_blue, theta_bins_blue, mask_blue = CosmicShear.CSsignalFunc(data_blue, cosmo, save_theory_vector=False)
 # xi_obs_blue, xi_theo_blue, theta_bins_blue, mask_blue = CosmicShear.CSsignalFunc(data_blue, cosmo, True)
 
 # chi2 
@@ -121,9 +121,8 @@ chi2_blue, dof_blue = Chi2Test.Chi2SingleFunc(nzbins, nzcorrs, theta_bins_blue, 
 
 
 # ++++++++++++++++++++++++++++++++++++++++++++ blue - red
-inDir_cov12 = '/disks/shear15/ssli/CosmicShear/covariance'
-# file_name_cov12 = 'thps_cov_mar11_list_br.dat'
-file_name_cov12 = 'thps_cov_mar11_usable_br.dat'
+inDir_cov12 = '/disks/shear15/ssli/CosmicShear/covariance/apr8_new'
+file_name_cov12 = 'thps_cov_apr8_br_list.dat'
 ntheta = 9
 # check the mask is the same
 if np.array_equal(mask_red, mask_blue):
@@ -137,12 +136,17 @@ else:
     print("Something wrong with the mask!")
 
 
-print("chi2_whole", chi2_whole)
+# print("chi2_whole", chi2_whole)
 print("chi2_red", chi2_red)
 print("chi2_blue", chi2_blue)
 print("chi2_blue_red", chi2_br)
 print("All finished in", time.time()-Start)
 # ('All finished in', 25.485830068588257) (covariance matrix in list form)
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 2020-04-12
+# ++++++++++++++++ new covariance from Benjamin (apr8)
+
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 2020-04-02
