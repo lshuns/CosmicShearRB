@@ -11,8 +11,6 @@ Please modify necessary configurations in Cosmo/cosmic_shear_signal/input
 
 """
 
-
-
 import time
 
 import os
@@ -22,7 +20,14 @@ sys.path.insert(0,os.path.realpath('../Cosmo/cosmic_shear_signal'))
 import CosmicShear, initialise
 
 
-Start = time.time()
+# +++++++++++++++++++ General setting
+# parameter files
+name_param_files = ['kv450_cf_best.param', 'kv450_cf_Planck.param']
+
+# Set the output folder
+out_folder = 'theory_vector'
+out_suffix_s = ['KV450_best', 'Planck']
+
 
 # path for all necessary input
 paths = {}
@@ -32,55 +37,57 @@ paths['cosmo'] = '/net/eemmeer/data1/ssli/class_public'
 paths['data'] = '/disks/shear15/ssli/CosmicShear'
 # parameter/configure file path
 paths['param'] =  '/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/CosmicShearRB/Cosmo/cosmic_shear_signal/input'
+
+# +++++++++++++++++++ Running scripts
+Start = time.time()
+
 # Initialisation
 # class: data and cosmo created
 cosmo, data = initialise.initialise(paths)
 
+for i in range(len(name_param_files)):
 
-# ++++++++++++++++++++++++++++++++++++++++++ whole
-# name of parameter/configure files
-name_param_file = 'kv450_cf_best.param'
-name_conf_file = 'kv450_cf.conf'
+    # parameter file (with cosmological and nuisance parameters)
+    name_param_file = name_param_files[i]
+    data.read_file(name_param_file, 'data', field='', separate=False)
+    # output folder
+    data.conf['out_folder'] = out_folder
+    data.conf['out_suffix'] = out_suffix_s[i]
 
-# data filled with input files
-# parameter file (with cosmological and nuisance parameters)
-data.read_file(name_param_file, 'data', field='', separate=False)
-# configure file (with configure and hardly changed setting parameters)
-data.read_file(name_conf_file, 'data', field='', separate=False)
+    # # ++++++++++++++++++++++++++++++++++++++++++ whole
+    # # name of configure files
+    # name_conf_file = 'kv450_cf.conf'
 
-# cosmic shear signal calculation
-CosmicShear.CSsignalFunc(data, cosmo)
+    # # data filled with input files
+    # # configure file (with configure and hardly changed setting parameters)
+    # data.read_file(name_conf_file, 'data', field='', separate=False)
 
+    # # cosmic shear signal calculation
+    # CosmicShear.CSsignalFunc(data, cosmo, save_theory_vector=True)
 
-# ++++++++++++++++++++++++++++++++++++++++++ red
-# name of parameter/configure files
-name_param_file = 'kv450_cf_best_red.param'
-name_conf_file = 'kv450_cf_red.conf'
+    # ++++++++++++++++++++++++++++++++++++++++++ red
+    # name of parameter/configure files
+    name_conf_file = 'kv450_cf_red.conf'
 
-# data filled with input files
-# parameter file (with cosmological and nuisance parameters)
-data.read_file(name_param_file, 'data', field='', separate=False)
-# configure file (with configure and hardly changed setting parameters)
-data.read_file(name_conf_file, 'data', field='', separate=False)
+    # data filled with input files
+    # configure file (with configure and hardly changed setting parameters)
+    data.read_file(name_conf_file, 'data', field='', separate=False)
 
-# cosmic shear signal calculation
-CosmicShear.CSsignalFunc(data, cosmo)
-
-
-# ++++++++++++++++++++++++++++++++++++++++++ blue
-# name of parameter/configure files
-name_param_file = 'kv450_cf_best_blue.param'
-name_conf_file = 'kv450_cf_blue.conf'
-
-# data filled with input files
-# parameter file (with cosmological and nuisance parameters)
-data.read_file(name_param_file, 'data', field='', separate=False)
-# configure file (with configure and hardly changed setting parameters)
-data.read_file(name_conf_file, 'data', field='', separate=False)
-
-# cosmic shear signal calculation
-CosmicShear.CSsignalFunc(data, cosmo)
+    # cosmic shear signal calculation
+    CosmicShear.CSsignalFunc(data, cosmo, save_theory_vector=True)
 
 
+    # ++++++++++++++++++++++++++++++++++++++++++ blue
+    # name of parameter/configure files
+    name_conf_file = 'kv450_cf_blue.conf'
+
+    # data filled with input files
+    # configure file (with configure and hardly changed setting parameters)
+    data.read_file(name_conf_file, 'data', field='', separate=False)
+
+    # cosmic shear signal calculation
+    CosmicShear.CSsignalFunc(data, cosmo, save_theory_vector=True)
 
 print("All finished in", time.time()-Start)
+# eemmeer (2020-04-23)
+# ('All finished in', 23.075681924819946)

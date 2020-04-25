@@ -22,8 +22,6 @@ import math
 
 import io_cs
 
-OUTPATH = '/disks/shear15/ssli/CosmicShear/data_vector/test/output/'
-
 def CSsignalFunc(data, cosmo, save_theory_vector=False):
     """
     Modeling the cosmic shear signal from theory 
@@ -619,7 +617,7 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
 
     # write out masked theory vector in list format:    
     if save_theory_vector:
-        io_cs.WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, xi, data.conf['out_suffix'])
+        io_cs.WriteVectorFunc(data, nzbins, theta_bins, mask_indices, xi)
         print('Predicted vector saved.')
     
     return xi_obs, xi, theta_bins, mask

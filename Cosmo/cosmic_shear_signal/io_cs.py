@@ -137,7 +137,7 @@ def ReadZdistribution(data, nzbins):
     return np.asarray(z_samples), np.asarray(hist_samples), len(zptemp)
 
 
-def WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, vec, fname_suffix):
+def WriteVectorFunc(data, nzbins, theta_bins, mask_indices, vec):
     """
     Write out the cosmic shear vector in list-format with mask
     """
@@ -146,6 +146,8 @@ def WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, vec, fn
     data_path = data.paths['data']
     out_folder = data.conf['out_folder']
     cutvalues_file = data.conf['cutvalues_file']
+    data_name = data.conf['sample']
+    fname_suffix = data.conf['out_suffix']
 
     # Initialise all output colunms
     thetas_all = []
@@ -163,6 +165,14 @@ def WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, vec, fn
     idx_tomo_z1 = np.concatenate(idx_tomo_z1)
     idx_tomo_z2 = np.concatenate(idx_tomo_z2)
 
+    # save uncut theory vector
+    idx_run = np.arange(len(idx_pm)) + 1
+    savedata = np.column_stack((idx_run, thetas_all, vec, idx_pm, idx_tomo_z1, idx_tomo_z2))
+    header = ' i    theta(i)\'        xi_p/m(i)  (p=1, m=2)  itomo   jtomo'
+    fname = os.path.join(data_path, '{:}/xi_theory_full_{:}_{:}.dat'.format(out_folder, data_name, fname_suffix))
+    np.savetxt(fname, savedata, header=header, delimiter='\t', fmt=['%4i', '%.5e', '%12.5e', '%i', '%i', '%i'])
+    print('Saved full vector in list format in \n', fname, '\n')
+
     # now apply correct masking:
     thetas_all = thetas_all[mask_indices]
     idx_pm = idx_pm[mask_indices]
@@ -173,7 +183,7 @@ def WriteVectorFunc(data, nzbins, theta_bins, mask_indices, mask_suffix, vec, fn
     idx_run = np.arange(len(idx_pm)) + 1
     savedata = np.column_stack((idx_run, thetas_all, vec, idx_pm, idx_tomo_z1, idx_tomo_z2))
     header = ' i    theta(i)\'        xi_p/m(i)  (p=1, m=2)  itomo   jtomo'
-    fname = os.path.join(data_path, '{:}/xi_cut_to_{:}_{:}.dat'.format(out_folder, mask_suffix, fname_suffix))
+    fname = os.path.join(data_path, '{:}/xi_theory_cut_{:}_{:}.dat'.format(out_folder, data_name, fname_suffix))
     np.savetxt(fname, savedata, header=header, delimiter='\t', fmt=['%4i', '%.5e', '%12.5e', '%i', '%i', '%i'])
     print('Saved vector in list format cut down to scales as specified in {:}: \n'.format(cutvalues_file), fname, '\n')
 

@@ -1,20 +1,18 @@
-# Maximum-likelihood results extracted from public mcmc chain
+# Best-fit results from Planck (1807.06209)
 # ++++++++++++++++++ Cosmological parameters:
 
+# Plik best fit (1807.06209)
 # CDM density (omega_cdm * h^2)
-data.cosmo_arguments['omega_cdm']    = 0.12029
-
+data.cosmo_arguments['omega_cdm']    = 0.12011
 # Scalar spectrum amplitude
-data.cosmo_arguments['ln10^{10}A_s'] = 3.098
-
+data.cosmo_arguments['ln10^{10}A_s'] = 3.0448
 # Baryon density (omega_b * h^2)
-data.cosmo_arguments['omega_b']      = 0.022068
-
+data.cosmo_arguments['omega_b']      = 0.022383
 # Scalar spectral index
-data.cosmo_arguments['n_s']          = 0.9624
-
+data.cosmo_arguments['n_s']          = 0.96605
 # Hubble parameter
-data.cosmo_arguments['h']            = 0.6711
+data.cosmo_arguments['h']            = 0.6732
+
 
 ## METHOD FOR NON-LINEAR CORRECTIONS ##
 # choose the method for calculation of non-linear corrections, any CLASS keyword
@@ -29,17 +27,6 @@ data.cosmo_arguments['non linear']   = 'hmcode'
 # Baryon feedback amplitude ('hmcode'):
 data.cosmo_arguments['c_min']        = 2.18854200e+00
 
-
-# ++++++++++++++++ Derived parameters:
-
-# Matter density
-#['Omega_m']      = 1.31588400e-01
-
-# Power spectrum amplitude
-#['sigma8']       = 1.16563400e+00
-
-# S8
-#['S8']      = 7.71987703e-01
 
 # ++++++++++++++++ Other cosmo parameters (fixed parameters, precision parameters, etc.)
 
