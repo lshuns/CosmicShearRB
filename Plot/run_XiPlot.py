@@ -533,7 +533,7 @@ err_diagonal = data[:,2]
 para_data_red['error'] = err_diagonal
 
 # KV450
-inpath = '/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_less3_KV450_best.dat'
+inpath = '/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_cut_less3_KV450_best.dat'
 data = np.loadtxt(inpath)
 theta = data[:,1]
 xi = data[:,2]
@@ -543,7 +543,7 @@ jto = data[:,5]
 para_KV450_red = pd.DataFrame({'theta': theta, 'xi': xi, 'pm': pm, 'ito': ito, 'jto': jto})
 
 # Planck
-inpath = '/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_less3_Planck.dat'
+inpath = '/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_cut_less3_Planck.dat'
 data = np.loadtxt(inpath)
 theta = data[:,1]
 xi = data[:,2]
@@ -570,7 +570,7 @@ err_diagonal = data[:,2]
 para_data_blue['error'] = err_diagonal
 
 # KV450
-inpath = '/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_greater3_KV450_best.dat'
+inpath = '/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_cut_greater3_KV450_best.dat'
 data = np.loadtxt(inpath)
 theta = data[:,1]
 xi = data[:,2]
@@ -580,7 +580,7 @@ jto = data[:,5]
 para_KV450_blue = pd.DataFrame({'theta': theta, 'xi': xi, 'pm': pm, 'ito': ito, 'jto': jto})
 
 # Planck
-inpath = '/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_greater3_Planck.dat'
+inpath = '/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_cut_greater3_Planck.dat'
 data = np.loadtxt(inpath)
 theta = data[:,1]
 xi = data[:,2]

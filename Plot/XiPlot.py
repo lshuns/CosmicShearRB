@@ -185,7 +185,7 @@ def XiPlotFunc(paras, names, nzbins,
 
     # legend
     if LABELS_FOR_THEORY != None:
-        fig.legend(handles, LABELS_USED, loc = 'upper right', bbox_to_anchor=(0.91, 0.89), frameon=False)
+        fig.legend(handles, LABELS_USED, loc = 'upper right', bbox_to_anchor=(0.92, 0.76), frameon=False)
 
     # ylabel
     if YTYPE == 'diff':
