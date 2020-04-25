@@ -14,8 +14,8 @@ import pandas as pd
 # cut matrix into three different parts:
 #       bb, rr, rb (=br)
 
-inpath = "/disks/shear15/ssli/CosmicShear/covariance/cov_from_benjamin/thps_cov_mar11_list.dat"
-outDir = "/disks/shear15/ssli/CosmicShear/covariance/"
+inpath = "/disks/shear15/ssli/CosmicShear/covariance/apr8_new/original/thps_cov_apr8_list.dat"
+outDir = "/disks/shear15/ssli/CosmicShear/covariance/apr8_new/"
 
 tmp_raw = np.loadtxt(inpath)
 
@@ -54,11 +54,11 @@ df_br = df[mask_br]
 
 
 # output
-outpath = outDir + 'thps_cov_mar11_list_bb.dat'
+outpath = outDir + 'thps_cov_apr8_bb_list.dat'
 df_bb.to_csv(outpath, sep=' ', index=False, header=False)
 #
-outpath = outDir + 'thps_cov_mar11_list_rr.dat'
+outpath = outDir + 'thps_cov_apr8_rr_list.dat'
 df_rr.to_csv(outpath, sep=' ', index=False, header=False)
 #
-outpath = outDir + 'thps_cov_mar11_list_br.dat'
+outpath = outDir + 'thps_cov_apr8_br_list.dat'
 df_br.to_csv(outpath, sep=' ', index=False, header=False)
