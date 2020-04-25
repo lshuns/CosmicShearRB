@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr 22 15:12:58 2020
+
+@author: ssli
+
+plot of redshift distribution from different samples.
+    plot in 5 tomographic bins
+"""
+
+import numpy as np
+import pandas as pd
+import feather
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+
+# +++++++++++++++ plot information
+# input directory
+inpathF_less3 = "/disks/shear15/ssli/CosmicShear/redshift/less3/Nz_DIR/Nz_DIR_Mean/Nz_DIR_"
+inpathF_greater3 = "/disks/shear15/ssli/CosmicShear/redshift/greater3/Nz_DIR/Nz_DIR_Mean/Nz_DIR_"
+inpathFs = [inpathF_less3, inpathF_greater3]
+inpathPs = ['z0.1t0.3.asc', 'z0.3t0.5.asc', 'z0.5t0.7.asc', 'z0.7t0.9.asc', 'z0.9t1.2.asc']
+
+# redshift bins
+z_mins = [0.1, 0.3, 0.5, 0.7, 0.9]
+z_maxs = [0.3, 0.5, 0.7, 0.9, 1.2]
+
+# output directory
+outfile_pdf = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/publish/distri_z.pdf"
+outfile_png = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/publish/distri_z.png"
+
+# plot related
+LABELS = ['$T_B \\leq 3$', '$T_B > 3$']
+COLORS = ['red', 'blue']
+XLABEL = "z"        
+YLABEL = "n(z)"
+XLIM = [0, 2]
+YLIM = [0, 6]
+
+
+# +++++++++++++++ Main code
+# general settings for plot
+mpl.use('Agg')
+mpl.rcParams['xtick.direction'] = 'in'
+mpl.rcParams['ytick.direction'] = 'in'
+mpl.rcParams['xtick.top'] = True
+mpl.rcParams['ytick.right'] = True
+plt.rc('font', size=12)
+
+fig, axes = plt.subplots(nrows=2, ncols=3, sharey=True)
+fig.subplots_adjust(hspace=0)
+fig.subplots_adjust(wspace=0)
+
+# index for tomo bin
+ibins = 1
+# for legend
+handles = []
+for i in range(2):
+    for j in range(3):
+        if ibins <= 5:
+            print("Plot for bin", ibins)
+            for k in range(len(inpathFs)):
+                inpath = inpathFs[k] + inpathPs[int(ibins-1)]
+                data = np.loadtxt(inpath)
+                x_val = data[:,0]
+                y_val = data[:,1]
+                print("Data loaded from", inpath)
+
+                # plot
+                CR = COLORS[k]
+                LAB = LABELS[k]
+
+                p_tmp = axes[i, j].plot(x_val, y_val, color=CR, label=LAB)
+                
+                # for legend
+                if ibins == 1:
+                    handles.append(p_tmp[0])
+
+            # shadow
+            axes[i, j].axvspan(z_mins[int(ibins-1)], z_maxs[int(ibins-1)], alpha=0.5, color='grey')
+            #
+            axes[i, j].set_xlim(XLIM[0], XLIM[1])
+            axes[i, j].set_ylim(YLIM[0], YLIM[1])
+            axes[i, j].set_xticks([0.5, 1.0, 1.5])
+            axes[i, j].set_yticks([0, 2, 4])
+
+            # bin label
+            label = 'Bin' + str(ibins)
+            x = XLIM[0] + 0.7*(XLIM[1]-XLIM[0])
+            y = YLIM[0] + 0.7*(YLIM[1]-YLIM[0])
+            axes[i,j].text(x, y, label)
+
+            if j == 0:
+                axes[i, j].set_ylabel(YLABEL)
+            if i == 1:
+                axes[i, j].set_xlabel(XLABEL)
+
+        else:
+            axes[i, j].axis('off')
+        ibins += 1
+
+fig.legend(handles, LABELS, loc = 'upper right', bbox_to_anchor=(0.85, 0.35), frameon=False)
+
+plt.savefig(outfile_pdf)
+print("Plot saved in", outfile_pdf)
+plt.savefig(outfile_png, dpi=300)
+print("Plot saved in", outfile_png)
+
+
+

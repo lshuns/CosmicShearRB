@@ -17,7 +17,8 @@ from matplotlib.ticker import ScalarFormatter, FormatStrFormatter, LinearLocator
 def XiPlotFunc(paras, names, nzbins,
                 CRs, MKs, MSs, LSs, LWs, ELWs,
                 YTYPE, 
-                outpath):
+                outpath,
+                LABELS_FOR_THEORY=None):
     """
     xi_pm plot
     """
@@ -37,7 +38,7 @@ def XiPlotFunc(paras, names, nzbins,
     # general parameters for plot
     XLIM_P = [0.4, 97.]
     XLIM_M = [3.5, 360.]
-    YLIM = [-4, 6]
+    YLIM = [-6, 6]
     # limits for hline
     XLIM_H = [0., 360.] 
 
@@ -59,6 +60,9 @@ def XiPlotFunc(paras, names, nzbins,
             ax[l, m].axis('off')
 
     # actual plot
+    # for legend
+    handles = []
+    LABELS_USED = []
     for i in range(nzbins):
         for j in range(nzbins):
             if j >= i:
@@ -75,10 +79,10 @@ def XiPlotFunc(paras, names, nzbins,
                 ms = [m_P, m_M] 
                 ids = [id_P, id_M] 
 
-                for k in range(2):
-                    l = ls[k]
-                    m = ms[k]
-                    id_pm = ids[k]
+                for index_pm in range(2):
+                    l = ls[index_pm]
+                    m = ms[index_pm]
+                    id_pm = ids[index_pm]
                     if id_pm == id_P:
                         XLIM = XLIM_P
                     else:
@@ -107,23 +111,35 @@ def XiPlotFunc(paras, names, nzbins,
                         LS = LSs[k]
                         LW = LWs[k]
                         ELW = ELWs[k]
+                        # Labels
+                        if LABELS_FOR_THEORY != None:
+                            LAB = LABELS_FOR_THEORY[k]
+
                         # data
                         theta = para[(para.pm==id_pm) & (para.ito==i+1) & (para.jto==j+1)]['theta'].values
                         xi = para[(para.pm==id_pm) & (para.ito==i+1) & (para.jto==j+1)]['xi'].values
-                        err = para[(para.pm==id_pm) & (para.ito==i+1) & (para.jto==j+1)]['error'].values
 
                         if name == 'data':
+                            err = para[(para.pm==id_pm) & (para.ito==i+1) & (para.jto==j+1)]['error'].values
                             ax[l, m].errorbar(theta, theta*xi*1e4, yerr=theta*err*1e4,
                                 color=CR, marker=MK, markersize=MS, elinewidth=ELW, 
                                 linestyle=LS, linewidth=LW)
                         elif name == 'theory':
-                            ax[l, m].plot(theta, theta*xi*1e4, 
-                                color=CR, linestyle=LS, linewidth=LW)
+                            if LABELS_FOR_THEORY != None:
+                                l_tmp = ax[l, m].plot(theta, theta*xi*1e4, 
+                                    color=CR, linestyle=LS, linewidth=LW, label=LAB)
+                                if i==0 and j==0 and index_pm==0:
+                                    handles.append(l_tmp[0])
+                                    LABELS_USED.append(LAB)
+                            else:
+                                ax[l, m].plot(theta, theta*xi*1e4, 
+                                    color=CR, linestyle=LS, linewidth=LW)
+                            
 
 
                     # plot set
                     # ticks
-                    ax[l, m].set_yticks([-2, 0, 2, 4])
+                    ax[l, m].set_yticks([-4, 0, 4])
                     if id_pm == id_P:
                         ax[l, m].set_xticks([1, 10, 100])
                     elif id_pm == id_M:
@@ -166,6 +182,10 @@ def XiPlotFunc(paras, names, nzbins,
                     # xlabel
                     if (i==0) and (j==0):
                         ax[l, m].set_xlabel(r'$\theta$ [arcmin]')
+
+    # legend
+    if LABELS_FOR_THEORY != None:
+        fig.legend(handles, LABELS_USED, loc = 'upper right', bbox_to_anchor=(0.91, 0.89), frameon=False)
 
     # ylabel
     if YTYPE == 'diff':
