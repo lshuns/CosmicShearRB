@@ -615,7 +615,7 @@ def CSsignalFunc(data, cosmo, save_theory_vector=False):
 
     xi = xi * dm_plus_one_sqr_obs + xipm_c + dc_sqr
 
-    # write out masked theory vector in list format:    
+    # write out theory vector (masked and full) in list format:    
     if save_theory_vector:
         io_cs.WriteVectorFunc(data, nzbins, theta_bins, mask_indices, xi)
         print('Predicted vector saved.')
