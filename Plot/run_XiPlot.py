@@ -410,32 +410,80 @@ from XiPlot import XiPlotFunc
 
 
 
-# ++++++++++++++++++++++++++++++++++++++++++ data (only): red-blue
+# ++++++++++++++++++++++++++++++++++++++++++ data (only): blue-red
 
 
 # Number of bins 
 nzbins = 5
 
 # custom settings for plot
-# color
-CRs = ['orange']
+# color 
+# without K / with K
+CRs = ['gray', 'orange']
 # marker: square
-MKs = ['o']
+MKs = ['o', 'o']
 # marker size
-MSs = [2]
+MSs = [2, 2]
 # linestyle (not used for data)
-LSs = ['none']
+LSs = ['none', 'none']
 # linewidth
-LWs = [None]
+LWs = [None, None]
 # linewidth of the errorbar lines
-ELWs = [1.0]
+ELWs = [1.0, 1.0]
 # YTYPE
 YTYPE = 'diff'
     
 # output directory
-outpath = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/CorrFunc/data_rb_diff.png"
+outpath = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/CorrFunc/data2_br_diff.png"
 
 
+########## without K
+# red
+# data
+inpath = '/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withoutK_less3.dat'
+data = np.loadtxt(inpath)
+theta = data[:,1]
+xi = data[:,2]
+pm = data[:,3]
+ito = data[:,4]
+jto = data[:,5]
+para_data_red = pd.DataFrame({'theta': theta, 'xi': xi, 'pm': pm, 'ito': ito, 'jto': jto})
+# error
+inpath = "/disks/shear15/ssli/CosmicShear/covariance/apr8/thps_cov_apr8_rr_inc_m_usable_mask.dat"
+err_r = np.loadtxt(inpath)
+
+
+# blue
+# data
+inpath = '/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withoutK_greater3.dat'
+data = np.loadtxt(inpath)
+theta = data[:,1]
+xi = data[:,2]
+pm = data[:,3]
+ito = data[:,4]
+jto = data[:,5]
+para_data_blue = pd.DataFrame({'theta': theta, 'xi': xi, 'pm': pm, 'ito': ito, 'jto': jto})
+# error
+inpath = "/disks/shear15/ssli/CosmicShear/covariance/apr8/thps_cov_apr8_bb_inc_m_usable_mask.dat"
+err_b = np.loadtxt(inpath)
+
+# difference
+# cross error
+inpath = "/disks/shear15/ssli/CosmicShear/covariance/apr8/thps_cov_apr8_br_inc_m_usable_mask.dat"
+err_c = np.loadtxt(inpath)
+err = err_b + err_r - 2.*err_c
+err_diagonal = np.diag(err)
+# use avarage for theta
+para_data1 = pd.DataFrame({'theta': (para_data_red['theta'].values+para_data_blue['theta'].values)/2.,
+                            'xi': para_data_blue['xi'].values - para_data_red['xi'].values,
+                            'pm': para_data_red['pm'].values,
+                            'ito': para_data_red['ito'].values,
+                            'jto': para_data_red['jto'].values,
+                            'error': np.sqrt(err_diagonal)
+                        })
+
+
+########## with K
 # red
 # data
 inpath = '/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_withK_less3.dat'
@@ -446,11 +494,6 @@ pm = data[:,3]
 ito = data[:,4]
 jto = data[:,5]
 para_data_red = pd.DataFrame({'theta': theta, 'xi': xi, 'pm': pm, 'ito': ito, 'jto': jto})
-# error
-inpath = "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_error_less3.dat"
-data = np.loadtxt(inpath)
-err_diagonal = data[:,2]
-para_data_red['error'] = err_diagonal
 
 
 # blue
@@ -463,24 +506,19 @@ pm = data[:,3]
 ito = data[:,4]
 jto = data[:,5]
 para_data_blue = pd.DataFrame({'theta': theta, 'xi': xi, 'pm': pm, 'ito': ito, 'jto': jto})
-# error
-inpath = "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_error_greater3.dat"
-data = np.loadtxt(inpath)
-err_diagonal = data[:,2]
-para_data_blue['error'] = err_diagonal
 
 # difference
 # use avarage for theta
-para_data = pd.DataFrame({'theta': (para_data_red['theta'].values+para_data_blue['theta'].values)/2.,
-                            'xi': para_data_red['xi'].values - para_data_blue['xi'].values,
+para_data2 = pd.DataFrame({'theta': (para_data_red['theta'].values+para_data_blue['theta'].values)/2.,
+                            'xi': para_data_blue['xi'].values - para_data_red['xi'].values,
                             'pm': para_data_red['pm'].values,
                             'ito': para_data_red['ito'].values,
                             'jto': para_data_red['jto'].values,
-                            'error': np.sqrt(para_data_red['error'].values**2.+para_data_blue['error'].values**2.)
-                        })
+                            'error': np.sqrt(err_diagonal)
+                            })
 
-paras = [para_data]
-names = ['data']
+paras = [para_data1, para_data2]
+names = ['data', 'data']
 
 XiPlotFunc(paras, names, nzbins,
                 CRs, MKs, MSs, LSs, LWs, ELWs,
@@ -488,7 +526,8 @@ XiPlotFunc(paras, names, nzbins,
                 outpath)
 
 
-# ++++++++++++++++++++++++++++++++++++++++++ data vs. theory (KV450 & Planck): red-blue
+
+# ++++++++++++++++++++++++++++++++++++++++++ data vs. theory (KV450 & Planck): blue-red
 
 # Number of bins 
 nzbins = 5
@@ -513,7 +552,8 @@ ELWs = [1.0, None, None]
 YTYPE = 'diff'
     
 # output directory
-outpath = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/CorrFunc/data_rb_diff_KV450_Planck.png"
+outpath1 = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/publish/data_br_diff_KV450_Planck.pdf"
+outpath2 = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/CorrFunc/data_br_diff_KV450_Planck.png"
 
 
 # red
@@ -527,13 +567,12 @@ ito = data[:,4]
 jto = data[:,5]
 para_data_red = pd.DataFrame({'theta': theta, 'xi': xi, 'pm': pm, 'ito': ito, 'jto': jto})
 # error
-inpath = "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_error_less3.dat"
-data = np.loadtxt(inpath)
-err_diagonal = data[:,2]
-para_data_red['error'] = err_diagonal
+inpath = "/disks/shear15/ssli/CosmicShear/covariance/apr8/thps_cov_apr8_rr_inc_m_usable_mask.dat"
+err_r = np.loadtxt(inpath)
 
 # KV450
 inpath = '/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_cut_less3_KV450_best.dat'
+
 data = np.loadtxt(inpath)
 theta = data[:,1]
 xi = data[:,2]
@@ -544,6 +583,7 @@ para_KV450_red = pd.DataFrame({'theta': theta, 'xi': xi, 'pm': pm, 'ito': ito, '
 
 # Planck
 inpath = '/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_cut_less3_Planck.dat'
+
 data = np.loadtxt(inpath)
 theta = data[:,1]
 xi = data[:,2]
@@ -564,13 +604,12 @@ ito = data[:,4]
 jto = data[:,5]
 para_data_blue = pd.DataFrame({'theta': theta, 'xi': xi, 'pm': pm, 'ito': ito, 'jto': jto})
 # error
-inpath = "/disks/shear15/ssli/CosmicShear/data_vector/for_plot/xi_for_plot_error_greater3.dat"
-data = np.loadtxt(inpath)
-err_diagonal = data[:,2]
-para_data_blue['error'] = err_diagonal
+inpath = "/disks/shear15/ssli/CosmicShear/covariance/apr8/thps_cov_apr8_bb_inc_m_usable_mask.dat"
+err_b = np.loadtxt(inpath)
 
 # KV450
 inpath = '/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_cut_greater3_KV450_best.dat'
+
 data = np.loadtxt(inpath)
 theta = data[:,1]
 xi = data[:,2]
@@ -581,6 +620,7 @@ para_KV450_blue = pd.DataFrame({'theta': theta, 'xi': xi, 'pm': pm, 'ito': ito, 
 
 # Planck
 inpath = '/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_cut_greater3_Planck.dat'
+
 data = np.loadtxt(inpath)
 theta = data[:,1]
 xi = data[:,2]
@@ -590,26 +630,30 @@ jto = data[:,5]
 para_Planck_blue = pd.DataFrame({'theta': theta, 'xi': xi, 'pm': pm, 'ito': ito, 'jto': jto})
 
 
-
 # difference
+# cross error
+inpath = "/disks/shear15/ssli/CosmicShear/covariance/apr8/thps_cov_apr8_br_inc_m_usable_mask.dat"
+err_c = np.loadtxt(inpath)
+err = err_b + err_r - 2.*err_c
+err_diagonal = np.diag(err)
 # use avarage for theta
 para_data = pd.DataFrame({'theta': (para_data_red['theta'].values+para_data_blue['theta'].values)/2.,
-                            'xi': para_data_red['xi'].values - para_data_blue['xi'].values,
+                            'xi': para_data_blue['xi'].values - para_data_red['xi'].values,
                             'pm': para_data_red['pm'].values,
                             'ito': para_data_red['ito'].values,
                             'jto': para_data_red['jto'].values,
-                            'error': np.sqrt(para_data_red['error'].values**2.+para_data_blue['error'].values**2.)
+                            'error': np.sqrt(err_diagonal)
                         })
 
 para_KV450 = pd.DataFrame({'theta': (para_KV450_red['theta'].values+para_KV450_blue['theta'].values)/2.,
-                            'xi': para_KV450_red['xi'].values - para_KV450_blue['xi'].values,
+                            'xi': para_KV450_blue['xi'].values - para_KV450_red['xi'].values,
                             'pm': para_KV450_red['pm'].values,
                             'ito': para_KV450_red['ito'].values,
                             'jto': para_KV450_red['jto'].values
                         })
 
 para_Planck = pd.DataFrame({'theta': (para_Planck_red['theta'].values+para_Planck_blue['theta'].values)/2.,
-                            'xi': para_Planck_red['xi'].values - para_Planck_blue['xi'].values,
+                            'xi': para_Planck_blue['xi'].values - para_Planck_red['xi'].values,
                             'pm': para_Planck_red['pm'].values,
                             'ito': para_Planck_red['ito'].values,
                             'jto': para_Planck_red['jto'].values
@@ -620,6 +664,10 @@ paras = [para_data, para_KV450, para_Planck]
 XiPlotFunc(paras, names, nzbins,
                 CRs, MKs, MSs, LSs, LWs, ELWs,
                 YTYPE,
-                outpath,
+                outpath1,
                 LABELS)
-
+XiPlotFunc(paras, names, nzbins,
+                CRs, MKs, MSs, LSs, LWs, ELWs,
+                YTYPE,
+                outpath2,
+                LABELS)
