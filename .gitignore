@@ -16,6 +16,7 @@ tmp/
 old/
 develop/
 original/
+trivial/
 
 *montepython*
 .DS_Store
