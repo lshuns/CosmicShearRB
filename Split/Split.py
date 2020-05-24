@@ -48,7 +48,7 @@ def SplitByNumFunc(data, para, ratio, outdirF, outdirP):
     print("Data saved to", outdir)
 
 
-def SplitByWgFunc(data, para, wg, ratio, outdirF, outdirP):
+def SplitByWgFunc(data, para, wg, ratio, outdirF=None, outdirP=None):
     """
     Function for sample split based on object weights (wg)
     """
@@ -84,16 +84,19 @@ def SplitByWgFunc(data, para, wg, ratio, outdirF, outdirP):
     print("Resulted total weights for the first part", np.sum(data1[wg].values))
     print("Resulted total weights for the latter part", np.sum(data2[wg].values))
     print("The weight for the edge object", data[wg][N1])
+    print("The {:} value for the front edge object".format(para), data1[para].values[-1])
+    print("The {:} value for the end edge object".format(para), data2[para].values[0])
 
-    outdir = outdirF + '_head_wg' + outdirP
-    data1 = data1.reset_index(drop=True)
-    data1.to_feather(outdir)
-    print("Data saved to", outdir)
+    if outdirF != None:
+        outdir = outdirF + '_head_wg' + outdirP
+        data1 = data1.reset_index(drop=True)
+        data1.to_feather(outdir)
+        print("Data saved to", outdir)
 
-    outdir = outdirF + '_tail_wg' + outdirP
-    data2 = data2.reset_index(drop=True)
-    data2.to_feather(outdir)
-    print("Data saved to", outdir)
+        outdir = outdirF + '_tail_wg' + outdirP
+        data2 = data2.reset_index(drop=True)
+        data2.to_feather(outdir)
+        print("Data saved to", outdir)
 
 
 def SplitByValFunc(data, para_col, cvalue, 
