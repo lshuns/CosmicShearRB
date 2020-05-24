@@ -34,14 +34,11 @@ outfile_pdf = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/publ
 outfile_png = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/publish/hist_e.png"
 
 # plot related
-# LABELS = ['whole', '$T_B \\leq 3$', '$T_B > 3$']
-LABELS = ['$T_B \\leq 3$', '$T_B > 3$']
-# COLORS = ['grey', 'red', 'blue']
+LABELS = [r'$T_{\rm B} \leq 3$', r'$T_{\rm B} > 3$']
 COLORS = ['red', 'blue']
-# NBINS = [60, 60, 60]
 NBINS = [60, 60]
 XLABEL = "Ellipticity"        
-YLABEL = "Normalized Counts"
+YLABEL = "Weighted counts"
 XLIM = [0, 1]
 YLIM = [0, 2.4]
 DENSITY = True
