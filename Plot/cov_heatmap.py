@@ -2,7 +2,7 @@
 # @Author: lshuns
 # @Date:   2020-05-05 21:17:39
 # @Last Modified by:   lshuns
-# @Last Modified time: 2020-05-24 15:05:18
+# @Last Modified time: 2020-05-25 15:50:28
 
 # covariance matrix plot with heatmap
 
@@ -71,10 +71,15 @@ sns.heatmap(
     square=True,
     cbar_kws={'label': r'$C_{ij}/\sqrt{C_{ii}C_{jj}}$', 'ticks': [0.00, 0.15, 0.30, 0.45, 0.60, 0.75, 0.90]}
 )
-fig.text(0.26, 0.06, r'$\xi_{\rm blue}$')
-fig.text(0.56, 0.06, r'$\xi_{\rm red}$')
-fig.text(0.13, 0.27, r'$\xi_{\rm red}$', rotation=90)
-fig.text(0.13, 0.74, r'$\xi_{\rm blue}$', rotation=90)
+
+midp = len(cov_comb_plot[0,:])/2
+ax.axvline(x=midp, color='gray', ls='--', lw=1)
+ax.axhline(y=midp, color='gray', ls='--', lw=1)
+
+fig.text(0.27, 0.06, r'$\xi_{\rm blue}$')
+fig.text(0.57, 0.06, r'$\xi_{\rm red}$')
+fig.text(0.13, 0.28, r'$\xi_{\rm red}$', rotation=90)
+fig.text(0.13, 0.72, r'$\xi_{\rm blue}$', rotation=90)
 
 
 fig.savefig(outfile_pdf, dpi=300)
