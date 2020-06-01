@@ -18,5 +18,7 @@ develop/
 original/
 trivial/
 
+.ipynb_checkpoints/
+
 *montepython*
 .DS_Store
