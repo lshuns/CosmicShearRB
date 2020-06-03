@@ -10,6 +10,8 @@ Post process of covariance calculation
 
 import numpy as np
 import pandas as pd
+import os
+
 
 # cut matrix into three different parts:
 #       bb, rr, rb (=br)
@@ -27,6 +29,9 @@ ParDir = "/disks/shear15/ssli/CosmicShear/covariance/"
 # path to the theory vector
 P_xi_theo_r = "/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_full_less3_KV450_best.dat"
 P_xi_theo_b = "/disks/shear15/ssli/CosmicShear/theory_vector/xi_theory_full_greater3_KV450_best.dat"
+
+# path to the cut file
+cutvalues_file_path = '/disks/shear15/ssli/CosmicShear/SUPPLEMENTARY_FILES/CUT_VALUES/cut_values_5zbins.txt'
 
 # +++++++++++++++++++++++++++++++++++++++ to list form
 inpath = ParDir + cov_tag + "/original/thps_cov_{:}_list.dat".format(cov_tag)
@@ -145,3 +150,69 @@ outpath3 = ParDir + cov_tag + '/thps_cov_{:}_br_inc_m_usable.dat'.format(cov_tag
 np.savetxt(outpath3, df_br)
 
 print('Saved covariance matrix (incl. shear calibration uncertainty) in format usable with this likelihood to: \n', outpath1, '\n', outpath2, '\n', outpath3, '\n')
+
+
+
+# ++++++++++++++++++++++++++++++++++++++++++++++ add mask (for plot)
+print('Now we construct the masked covariance matrix.')
+
+def ReadCutValueFunc(theta_bins, cutvalues_file_path):
+    """
+    Read cut values and convert into mask
+    """
+
+    ntheta = 9
+    nzbins = 5
+    nzcorrs = int(nzbins * (nzbins + 1) / 2)
+
+    if os.path.exists(cutvalues_file_path):
+        cut_values = np.loadtxt(cutvalues_file_path)
+    else:
+        raise Exception('File not found:\n {:} \n \
+            Check that requested file exists in the following folder: \
+            \n {:}'.format(cutvalues_file_path))
+
+    # create the mask
+    mask = np.zeros(2 * nzcorrs * ntheta)
+    iz = 0
+    for izl in range(nzbins):
+        for izh in range(izl, nzbins):
+            # this counts the bin combinations
+            # iz=1 =>(1,1), iz=2 =>(1,2) etc
+            iz = iz + 1
+            for i in range(ntheta):
+                j = (iz-1)*2*ntheta
+                xi_plus_cut_low = max(cut_values[izl, 0], cut_values[izh, 0])
+                xi_plus_cut_high = max(cut_values[izl, 1], cut_values[izh, 1])
+                xi_minus_cut_low = max(cut_values[izl, 2], cut_values[izh, 2])
+                xi_minus_cut_high = max(cut_values[izl, 3], cut_values[izh, 3])
+                if ((theta_bins[i] < xi_plus_cut_high) and (theta_bins[i]>xi_plus_cut_low)):
+                    mask[j+i] = 1
+                if ((theta_bins[i] < xi_minus_cut_high) and (theta_bins[i]>xi_minus_cut_low)):
+                    mask[ntheta + j+i] = 1
+
+    mask_indices = np.where(mask == 1)[0]
+
+    return mask, mask_indices
+
+
+theta_bins = np.loadtxt(P_xi_theo_r)[:,1]
+mask, mask_indices = ReadCutValueFunc(theta_bins, cutvalues_file_path)
+
+mask_indices_cov = np.ix_(mask_indices, mask_indices)
+
+# mask cov
+df_bb = df_bb[mask_indices_cov]
+outpath1 = ParDir + cov_tag + '/thps_cov_{:}_bb_inc_m_usable_mask.dat'.format(cov_tag)
+np.savetxt(outpath1, df_bb)
+
+df_rr = df_rr[mask_indices_cov]
+outpath2 = ParDir + cov_tag + '/thps_cov_{:}_rr_inc_m_usable_mask.dat'.format(cov_tag)
+np.savetxt(outpath2, df_rr)
+
+df_br = df_br[mask_indices_cov]
+outpath3 = ParDir + cov_tag + '/thps_cov_{:}_br_inc_m_usable_mask.dat'.format(cov_tag)
+np.savetxt(outpath3, df_br)
+
+print('Saved masked covariance matrix to: \n', outpath1, '\n', outpath2, '\n', outpath3, '\n')
+
