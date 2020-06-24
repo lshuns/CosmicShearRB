@@ -2,7 +2,7 @@
 # @Author: lshuns
 # @Date:   2020-05-05 21:17:39
 # @Last Modified by:   lshuns
-# @Last Modified time: 2020-05-25 15:50:28
+# @Last Modified time: 2020-06-11 12:38:11
 
 # covariance matrix plot with heatmap
 
@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from matplotlib.colors import LogNorm
+plt.rcParams["text.usetex"] =True
 
 
 # +++++++++++++++++++++++++++++++++++++++ general setting
@@ -24,8 +25,8 @@ cov_tag = 'apr8'
 ParDir = "/disks/shear15/ssli/CosmicShear/covariance/"
 
 # path to save the plot
-outfile_pdf = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/publish/cov_comb_br.pdf"
-outfile_png = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/Cov/cov_comb_br.png"
+# outfile_pdf = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/publish/cov_comb_br.pdf"
+outfile_png = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/publish/cov_comb_br.png"
 
 # covariance matrix
 # blue part
@@ -60,10 +61,11 @@ cov_comb_plot = cov_comb/cov_comb_norm
 # mpl.use('Agg')
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
-plt.rc('font', size=12)
+plt.rc('font', size=14)
 
 ### normalized 
-fig, ax = plt.subplots(1, 1)
+fig, ax = plt.subplots()
+plt.subplots_adjust(left=0, bottom=0.05, right=1.0, top=0.99, wspace=0, hspace=0)
 # cmap = sns.diverging_palette(250, 0, sep=10, as_cmap=True)
 sns.heatmap(
     cov_comb_plot, ax=ax, cmap='Reds',
@@ -76,14 +78,14 @@ midp = len(cov_comb_plot[0,:])/2
 ax.axvline(x=midp, color='gray', ls='--', lw=1)
 ax.axhline(y=midp, color='gray', ls='--', lw=1)
 
-fig.text(0.27, 0.06, r'$\xi_{\rm blue}$')
-fig.text(0.57, 0.06, r'$\xi_{\rm red}$')
-fig.text(0.13, 0.28, r'$\xi_{\rm red}$', rotation=90)
-fig.text(0.13, 0.72, r'$\xi_{\rm blue}$', rotation=90)
+fig.text(0.27, 0.01, r'$\xi_{\rm blue}$')
+fig.text(0.57, 0.01, r'$\xi_{\rm red}$')
+fig.text(0.06, 0.28, r'$\xi_{\rm red}$', rotation=90)
+fig.text(0.06, 0.72, r'$\xi_{\rm blue}$', rotation=90)
 
 
-fig.savefig(outfile_pdf, dpi=300)
-print("Plot saved in", outfile_pdf)
+# fig.savefig(outfile_pdf, dpi=300)
+# print("Plot saved in", outfile_pdf)
 fig.savefig(outfile_png, dpi=300)
 print("Plot saved in", outfile_png)
 plt.close()

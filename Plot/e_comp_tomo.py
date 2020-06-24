@@ -14,6 +14,7 @@ import pandas as pd
 import feather
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+plt.rcParams["text.usetex"] =True
 
 
 # +++++++++++++++ plot information
@@ -37,12 +38,15 @@ outfile_png = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/publ
 LABELS = [r'$T_{\rm B} \leq 3$', r'$T_{\rm B} > 3$']
 COLORS = ['red', 'blue']
 NBINS = [60, 60]
-XLABEL = "Ellipticity"        
-YLABEL = "Weighted counts"
+XLABEL = r'$\epsilon$'        
+YLABEL = "Weighted density"
 XLIM = [0, 1]
 YLIM = [0, 2.4]
 DENSITY = True
 HISTTYPE = 'step'
+
+# bin title
+titles = [r'$0.1< z_{\rm B} \leq 0.3$', r'$0.3< z_{\rm B} \leq 0.5$', r'$0.5< z_{\rm B} \leq 0.7$', r'$0.7< z_{\rm B} \leq 0.9$', r'$0.9< z_{\rm B} \leq 1.2$']
 
 
 # +++++++++++++++ Main code
@@ -52,6 +56,7 @@ mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
 mpl.rcParams['xtick.top'] = True
 mpl.rcParams['ytick.right'] = True
+
 plt.rc('font', size=12)
 
 fig, axes = plt.subplots(nrows=2, ncols=3, sharey=True)
@@ -88,21 +93,29 @@ for i in range(2):
             axes[i, j].set_xticks([0.2, 0.4, 0.6, 0.8])
 
             # bin label
-            label = 'Bin' + str(ibins)
-            x = XLIM[0] + 0.7*(XLIM[1]-XLIM[0])
-            y = YLIM[0] + 0.7*(YLIM[1]-YLIM[0])
+            label = titles[int(ibins-1)]
+            x = XLIM[0] + 0.3*(XLIM[1]-XLIM[0])
+            y = YLIM[0] + 0.8*(YLIM[1]-YLIM[0])
             axes[i,j].text(x, y, label)
 
-            if j == 0:
-                axes[i, j].set_ylabel(YLABEL)
+            # lable
+            # if j == 0:
+                # axes[i, j].set_ylabel(YLABEL)
             if i == 1:
+                axes[i, j].set_xlabel(XLABEL)
+            if (i==0 and j==2):
                 axes[i, j].set_xlabel(XLABEL)
 
         else:
             axes[i, j].axis('off')
         ibins += 1
 
-fig.legend(handles, LABELS, loc = 'upper right', bbox_to_anchor=(0.85, 0.35), frameon=False)
+
+# Y label
+fig.text(0.04, 0.5, YLABEL, va='center', rotation='vertical')
+
+fig.legend(handles, LABELS, loc = 'upper right', bbox_to_anchor=(0.88, 0.35), fancybox=True, shadow=True)
+
 
 plt.savefig(outfile_pdf)
 print("Plot saved in", outfile_pdf)

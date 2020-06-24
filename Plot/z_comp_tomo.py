@@ -14,6 +14,7 @@ import pandas as pd
 import feather
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+plt.rcParams["text.usetex"] =True
 
 
 # +++++++++++++++ plot information
@@ -37,8 +38,8 @@ z_median_greater3 = [0.244, 0.431, 0.644, 0.842, 1.022]
 dz_mean = []
 dz_median = []
 for i in range(len(z_mean_greater3)):
-    dz_mean.append('{:0.3f}'.format(z_mean_greater3[i]-z_mean_less3[i]))
-    dz_median.append('{:0.3f}'.format(z_median_greater3[i]-z_median_less3[i]))
+    dz_mean.append('{:+0.2f}'.format(z_mean_greater3[i]-z_mean_less3[i]))
+    dz_median.append('{:+0.2f}'.format(z_median_greater3[i]-z_median_less3[i]))
 
 # output directory
 outfile_pdf = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/publish/distri_z.pdf"
@@ -47,11 +48,13 @@ outfile_png = "/net/raam/data1/surfdrive_ssli/Projects/6CosmicShear_RB/plot/publ
 # plot related
 LABELS = [r'$T_{\rm B} \leq 3$', r'$T_{\rm B} > 3$']
 COLORS = ['red', 'blue']
-XLABEL = "z"        
-YLABEL = "n(z)"
+XLABEL = r'$z$'        
+YLABEL = r'$n(z)$'
 XLIM = [0, 2.5]
 YLIM = [0, 6]
 
+# bin title
+titles = [r'$0.1< z_{\rm B} \leq 0.3$', r'$0.3< z_{\rm B} \leq 0.5$', r'$0.5< z_{\rm B} \leq 0.7$', r'$0.7< z_{\rm B} \leq 0.9$', r'$0.9< z_{\rm B} \leq 1.2$']
 
 # +++++++++++++++ Main code
 # general settings for plot
@@ -92,7 +95,7 @@ for i in range(2):
                     handles.append(p_tmp[0])
 
             # shadow
-            axes[i, j].axvspan(z_mins[int(ibins-1)], z_maxs[int(ibins-1)], alpha=0.5, color='grey')
+            axes[i, j].axvspan(z_mins[int(ibins-1)], z_maxs[int(ibins-1)], alpha=0.3, color='grey')
             #
             axes[i, j].set_xlim(XLIM[0], XLIM[1])
             axes[i, j].set_ylim(YLIM[0], YLIM[1])
@@ -100,19 +103,20 @@ for i in range(2):
             axes[i, j].set_yticks([0, 2, 4])
 
             # bin label
-            label = 'Bin' + str(ibins)
-            x = XLIM[0] + 0.6*(XLIM[1]-XLIM[0])
-            y = YLIM[0] + 0.7*(YLIM[1]-YLIM[0])
-            y2 = YLIM[0] + 0.6*(YLIM[1]-YLIM[0])
-            y3 = YLIM[0] + 0.5*(YLIM[1]-YLIM[0])
+            label = titles[int(ibins-1)]
+            x = XLIM[0] + 0.3*(XLIM[1]-XLIM[0])
+            y = YLIM[0] + 0.8*(YLIM[1]-YLIM[0])
+            x2 = XLIM[0] + 0.33*(XLIM[1]-XLIM[0])
+            y2 = YLIM[0] + 0.65*(YLIM[1]-YLIM[0])
 
             axes[i,j].text(x, y, label)
-            axes[i,j].text(x, y2, '[{:},'.format(dz_mean[int(ibins-1)]), fontsize=10)
-            axes[i,j].text(x, y3, ' {:}]'.format(dz_median[int(ibins-1)]), fontsize=10)
+            axes[i,j].text(x2, y2, r'$[{:}, {:}]$'.format(dz_mean[int(ibins-1)], dz_median[int(ibins-1)]))
 
             if j == 0:
                 axes[i, j].set_ylabel(YLABEL)
             if i == 1:
+                axes[i, j].set_xlabel(XLABEL)
+            if (i==0 and j==2):
                 axes[i, j].set_xlabel(XLABEL)
 
         else:
@@ -120,10 +124,7 @@ for i in range(2):
         ibins += 1
 
 fig.legend(handles, LABELS, loc = 'upper right', bbox_to_anchor=(0.85, 0.4), frameon=False)
-fig.text(0.68, 0.22, r'[$\delta z_{\rm mean}$,')
-fig.text(0.69, 0.17, r'$\delta z_{\rm median}$]')
-
-
+fig.text(0.67, 0.23, r'$[\delta z_{\rm mean}, \delta z_{\rm median}]$')
 
 plt.savefig(outfile_pdf)
 print("Plot saved in", outfile_pdf)

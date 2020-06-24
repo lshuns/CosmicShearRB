@@ -24,12 +24,14 @@ def XiPlotFunc(paras, names, nzbins,
     """
 
     # general settings for plot
+    plt.rcParams["text.usetex"] =True
     mpl.use('Agg')
     mpl.rcParams['xtick.direction'] = 'in'
     mpl.rcParams['ytick.direction'] = 'in'
     #mpl.rcParams['xtick.top'] = True
     #mpl.rcParams['ytick.right'] = True
     plt.rc('font', size=9)
+
 
     fig, ax = plt.subplots(nzbins+2, nzbins+2, sharey=True)
     fig.subplots_adjust(hspace=0)
@@ -181,7 +183,7 @@ def XiPlotFunc(paras, names, nzbins,
 
                     # xlabel
                     if (i==0) and (j==0):
-                        ax[l, m].set_xlabel(r'$\theta$ [arcmin]')
+                        ax[l, m].set_xlabel(r'$\theta~[{\rm arcmin}]$')
 
     # legend
     if LABELS_FOR_THEORY != None:
@@ -189,17 +191,17 @@ def XiPlotFunc(paras, names, nzbins,
 
     # ylabel
     if YTYPE == 'diff':
-        fig.text(0.05, 0.5, r'$\theta \times \Delta\xi_+ [10^{-4}$ arcmin]', 
+        fig.text(0.07, 0.5, r'$\theta \times \Delta\xi_+ [10^{-4}~{\rm arcmin}]$', 
              horizontalalignment='center', verticalalignment='center',
              rotation='vertical')
-        fig.text(0.95, 0.5, r'$\theta \times \Delta\xi_- [10^{-4}$ arcmin]', 
+        fig.text(0.93, 0.5, r'$\theta \times \Delta\xi_- [10^{-4}~{\rm arcmin}]$', 
                  horizontalalignment='center', verticalalignment='center',
                  rotation='vertical')
     elif YTYPE == 'orig':
-        fig.text(0.05, 0.5, r'$\theta \times \xi_+ [10^{-4}$ arcmin]', 
+        fig.text(0.07, 0.5, r'$\theta \times \xi_+ [10^{-4}~{\rm arcmin}]$', 
              horizontalalignment='center', verticalalignment='center',
              rotation='vertical')
-        fig.text(0.95, 0.5, r'$\theta \times \xi_- [10^{-4}$ arcmin]', 
+        fig.text(0.93, 0.5, r'$\theta \times \xi_- [10^{-4}~{\rm arcmin}]$', 
              horizontalalignment='center', verticalalignment='center',
              rotation='vertical')
     else:
