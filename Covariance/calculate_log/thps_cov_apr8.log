@@ -1,0 +1,249 @@
+#!/bin/bash
+# wrapper script for KiDS covariance calculation - real space, red/blue split
+
+### settings
+
+# cosmology
+omf=0.2905
+ovf=0.7095      
+sif=0.826
+huf=0.6898
+nsf=0.969
+obf=0.0473
+w0f=-1.00
+waf=0.00
+
+# binnings
+nz=10       # no. of redshift bins (total for red and blue)
+zstep=0.05  # z step size in p(z) file
+nt=9        # no. of angular bins
+tbmin=0.5   # min. angular bin boundary [arcmin]
+tbmax=300.  # max. angular bin boundary [arcmin]
+
+# files and paths
+run_ident=apr8
+input_path=/export/barra/joachimi/kids/kv450_redblue/input/
+result_path=/export/barra/joachimi/kids/kv450_redblue/results/
+pofz_file=${input_path}/Nz_DIR_shift_to_middle.asc
+dens_file=${input_path}/ndens.dat
+ndens_blue_file=${input_path}/Ndensity_sigmae_blue.txt
+ndens_red_file=${input_path}/Ndensity_sigmae_red.txt
+eps_file=${input_path}/sigma_eps_total.dat
+pairs_file=${input_path}/npairs_blue_red_all.dat
+mask_file=/export/barra/joachimi/kids/kv450/input/KiDS-NS_KV450_footprint_healpix.fits
+tomo_bin_names="ZB0p1t0p3","ZB0p3t0p5","ZB0p5t0p7","ZB0p7t0p9","ZB0p9t1p2"  # unused
+
+# covariance settings
+do_cov=1    # 1: calculate covariance; 0: skip calculation
+cov_ssc=1   # 1: include; 0: switch off
+cov_ng=1
+cov_g=1
+use_actual_pairs=1   # 1: use actual galaxy pairs for shape noise; 0: use expectation value
+
+
+### CODE ###
+
+### internal settings
+home=$PWD
+repo_path=/home/joachimi/coderepo/
+zfromfile=1
+zmin=`awk '{ print $1; exit }' ${pofz_file}`
+zmax=`awk 'END{ print $1 }' ${pofz_file}`
+binlist=""  # unused
+nonlinfit=TAK12
+transferfunc=EHW
+hmf_type=T10
+flag_2h=0  # use 2h term in trispectrum     
+nl=1  # unused
+lmin=1.  # unused
+lmax=1.  # unused
+cov_space=1  # use real space covariance
+printzpg=1
+tbnarray=(${tomo_bin_names//,/ })
+#tbnlength=${#tbnarray[*]}
+#if [ $tbnlength -ne $nz ]
+#then
+#  echo "Error: incorrect number of entries in tomo_bin_names."
+#  exit -1
+#fi
+export THPS_LINLOG2=log        # read binning from file
+export THPS_COV_INVERSE=yes    # calculate inverse  
+export THPS_BINAVERAGE=gauss   # angular bin averaging
+
+
+
+### prepare n_dens and sigma_eps files
+
+awk '{ print $1, $1 }' ${dens_file} > ${result_path}/thps_cov_${run_ident}_ndens.dat
+
+cp ${eps_file} ${result_path}/thps_cov_${run_ident}_sigma_sq.dat
+
+
+
+### prepare angular binning files
+
+tstep=`awk 'BEGIN{ print (log('${tbmax}')-log('${tbmin}'))/'${nt}' }'`
+
+awk 'BEGIN{ for (i=1;i<='${nt}';i++) printf "%15.10e\t%15.10e\n",'${tbmin}'*(exp(i*'${tstep}')+exp((i-1)*'${tstep}'))/2.,'${tbmin}'*(exp(i*'${tstep}')-exp((i-1)*'${tstep}')) }' > ${result_path}/thps_cov_binning_angular_${run_ident}.dat  # all in arcmin; uses arithmetic mean
+
+tmin=`awk 'BEGIN{ print '${tbmin}'*exp('${tstep}'/2.) }'`
+tmax=`awk 'BEGIN{ print '${tbmax}'*exp((-1.)*'${tstep}'/2.) }'`
+
+
+
+### prepare survey window files
+
+if [ -s ${result_path}/survey_window_alm_${run_ident}.dat ]
+then
+  echo "Re-use survey window alm file ${result_path}/survey_window_alm_${run_ident}.dat"
+else 
+  cd ${repo_path}/covariances/survey_window/
+
+  ./windowL ${mask_file} ${result_path}/survey_window_alm_${run_ident}.dat ${result_path}/survey_window_area_${run_ident}.dat 
+fi
+
+area=`awk '{ if ($1!="#") print $1 }' ${result_path}/survey_window_area_${run_ident}.dat`
+echo "Use effective area for survey:" $area
+cp ${result_path}/survey_window_alm_${run_ident}.dat ${result_path}/thps_cov_${run_ident}_alms.dat
+awk '{ if (NR==2) print $0 }' ${result_path}/survey_window_area_${run_ident}.dat > ${result_path}/thps_cov_${run_ident}_alms_area.dat
+cd $home
+
+
+
+### prepare galaxy pair count files
+if [ $use_actual_pairs -eq 1 ]
+then
+
+  awk '{ if ($1!="#") { for (i=2;i<=NF;i++) printf "%15.10e\t", $i; printf "\n" } }' ${pairs_file} > ${result_path}/tmp.dat  # remove first column with angular bin centres
+
+  ndens_ratio_blue=`awk '{ if ($1!="#") printf "%10.7f,", $4/$3 }' ${ndens_blue_file}`
+  ndens_ratio_red=`awk '{ if ($1!="#") printf "%10.7f,", $4/$3 }' ${ndens_red_file}`
+  ndens_ratio=${ndens_ratio_blue}${ndens_ratio_red}
+
+  ndens_ratio_array=(${ndens_ratio//,/ })
+  ndens_ratio_array_length=${#ndens_ratio_array[*]}
+  if [ $ndens_ratio_array_length -ne $nz ]
+  then
+    echo "Error: incorrect number of entries in variable ndens_ratio."
+    exit -1
+  fi
+
+  awk -v var="$ndens_ratio" 'BEGIN{ split(var,ndr,",") }; { count=1; for (i=1; i<='${nz}'; i++) { for (j=i; j<='${nz}'; j++) { printf "%15.10e\t", $(count)*ndr[i]*ndr[j]; count++ } } printf "\n" }' ${result_path}/tmp.dat > ${result_path}/thps_cov_${run_ident}_npair.dat
+  rm -f ${result_path}/tmp.dat
+
+else
+  rm -f ${result_path}/thps_cov_${run_ident}_npair.dat
+fi
+
+
+
+### create parameter files
+
+run_ident_noise=${run_ident}_noise
+
+cp ${repo_path}/psvareos/proc/thps.param ${result_path}/
+
+awk '{
+ if (/Omega_m/) print "Omega_m			'${omf}'"
+ else if (/Omega_v/) print "Omega_v			'${ovf}'"
+ else if (/w_0/) print "w_0            	    '${w0f}'"
+ else if (/w_a/) print "w_a			     '${waf}'"
+ else if (/Omega_b/) print "Omega_b			'${obf}'"
+ else if (/h_100/) print "h_100			'${huf}'"
+ else if (/sigma_8/) print "sigma_8			'${sif}'"
+ else if (/n_spec/) print "n_spec			'${nsf}'"
+ else if (/bg_zdistr_zmin/) print "bg_zdistr_zmin          '${zmin}'"
+ else if (/bg_zdistr_zmax/) print "bg_zdistr_zmax         '${zmax}'"
+ else if (/bg_zdistr_file/) print "bg_zdistr_file         '${zfromfile}'"
+ else if (/bg_zdistr_zfile/) print "bg_zdistr_zfile         '${pofz_file}'"
+ else if (/method/) print "method           '${nonlinfit}'"
+ else if (/transferfunc/) print "transferfunc     '${transferfunc}'"
+ else if (/outp_path/) print "outp_path		'${result_path}'"
+ else if (/tomo_nbin/) print "tomo_nbin		'${nz}'"
+ else if (/tomo_id/) print "tomo_id		'${run_ident}'"	
+ else if (/tomo_bins/) print "tomo_bins               '${binlist}'"
+ else if (/tomo_nlbin/) print "tomo_nlbin              '${nl}'"
+ else if (/tomo_lmin/) print "tomo_lmin               '${lmin}'"
+ else if (/tomo_lmax/) print "tomo_lmax               '${lmax}'"
+ else if (/tomo_real/) print "tomo_real               '${cov_space}'"
+ else if (/tomo_ntbin/) print "tomo_ntbin               '${nt}'"
+ else if (/tomo_tmin/) print "tomo_tmin               '${tbmin}'"
+ else if (/tomo_tmax/) print "tomo_tmax               '${tbmax}'"
+ else if (/tomo_print/) print "tomo_print              '${printzpg}'"
+ else if (/A_survey/) print "A_survey               '${area}'"
+ else if (/halo_massfunc_type/) print "halo_massfunc_type         '${hmf_type}'"
+ else if (/halo_use_2h/) print "halo_use_2h               '${flag_2h}'"      
+ else print $0
+}' ${result_path}/thps.param > ${result_path}/thps_kids_${run_ident}.param
+rm -f ${result_path}/thps.param
+
+awk '{  
+ if (/tomo_id/) print "tomo_id          '${run_ident_noise}'"  
+ else print $0
+}' ${result_path}/thps_kids_${run_ident}.param > ${result_path}/thps_kids_${run_ident_noise}.param
+
+cp ${result_path}/thps_cov_${run_ident}_ndens.dat ${result_path}/thps_cov_${run_ident_noise}_ndens.dat
+if [ $use_actual_pairs -eq 1 ]
+then
+  cp ${result_path}/thps_cov_${run_ident}_npair.dat ${result_path}/thps_cov_${run_ident_noise}_npair.dat
+else
+  rm -f ${result_path}/thps_cov_${run_ident_noise}_npair.dat
+fi
+cp ${result_path}/thps_cov_${run_ident}_sigma_sq.dat ${result_path}/thps_cov_${run_ident_noise}_sigma_sq.dat
+cp ${result_path}/thps_cov_binning_angular_${run_ident}.dat ${result_path}/thps_cov_binning_angular_${run_ident_noise}.dat
+cp ${result_path}/thps_cov_${run_ident}_alms.dat ${result_path}/thps_cov_${run_ident_noise}_alms.dat
+cp ${result_path}/thps_cov_${run_ident}_alms_area.dat ${result_path}/thps_cov_${run_ident_noise}_alms_area.dat
+
+
+awk '{  
+ if (/tomo_tmin/) print "tomo_tmin               '${tmin}'"
+ else if (/tomo_tmax/) print "tomo_tmax               '${tmax}'"
+ else print $0
+}' ${result_path}/thps_kids_${run_ident}.param > ${result_path}/thps_kids_${run_ident}_xi.param
+
+
+
+### create fiducial correlation functions
+cd ${repo_path}/psvareos/proc/
+
+./thps_tomo ${result_path}/thps_kids_${run_ident}_xi.param
+
+cd $home
+
+
+
+### run covariance calculation
+if [ $do_cov -eq 1 ]
+then
+  cd ${repo_path}/psvareos/proc/
+
+  ./thps_cov ${result_path}/thps_kids_${run_ident}.param $cov_ssc $cov_ng $cov_g 0 0 1 0 1 0  # hard-coded lensing xi covariance
+  ./thps_cov ${result_path}/thps_kids_${run_ident_noise}.param 0 0 1 0 0 1 0 1 2  # additional shape noise only covariance 
+
+  cd $home
+else
+  echo "Skip calculation of covariance."
+fi
+
+
+
+### post-processing
+
+if [ -s ${result_path}/thps_cov_${run_ident}_list.dat ]
+then
+  awk '{ if (($1!="")&&($1==$7)&&($2==$8)&&($5==$11)&&($6==$12)) print $0 }' ${result_path}/thps_cov_${run_ident}_list.dat > ${result_path}/thps_cov_${run_ident}_list_diag.dat   # get diagonal entries only
+fi
+
+if [ -s ${result_path}/thps_cov_${run_ident_noise}_list.dat ]
+then
+  awk '{ if (($1!="")&&($1==$7)&&($2==$8)&&($5==$11)&&($6==$12)) print $0 }' ${result_path}/thps_cov_${run_ident_noise}_list.dat > ${result_path}/thps_cov_${run_ident_noise}_list_diag.dat   # get diagonal entries only
+fi
+
+cat $0 > ${result_path}/thps_cov_${run_ident}.log
+
+cd ${result_path}
+
+tar cvfz kids_cov_shunsheng_results_${run_ident}.tar.gz thps_cov_${run_ident}_list.dat thps_cov_${run_ident}_noise_list.dat xi_p_${run_ident}.dat xi_m_${run_ident}.dat thps_cov_${run_ident}.log
+
+
+echo "  All done."
