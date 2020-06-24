@@ -1,12 +1,12 @@
 A_IA_m   A_{\rm IA}
 A_IA_s   A_{\rm IA,s}
-D_z1_m   \delta_{z1}
-D_z2_m   \delta_{z2}
-D_z3_m   \delta_{z3}
-D_z4_m   \delta_{z4}
-D_z5_m   \delta_{z5}
-D_z1_s   \delta_{z1,s}
-D_z2_s   \delta_{z2,s}
-D_z3_s   \delta_{z3,s}
-D_z4_s   \delta_{z4,s}
-D_z5_s   \delta_{z5,s}
+D_z1_m   \delta_{z_1}
+D_z2_m   \delta_{z_2}
+D_z3_m   \delta_{z_3}
+D_z4_m   \delta_{z_4}
+D_z5_m   \delta_{z_5}
+D_z1_s   \delta_{z_1,{\rm s}}
+D_z2_s   \delta_{z_2,{\rm s}}
+D_z3_s   \delta_{z_3,{\rm s}}
+D_z4_s   \delta_{z_4,{\rm s}}
+D_z5_s   \delta_{z_5,{\rm s}}
