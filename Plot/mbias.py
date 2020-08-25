@@ -2,7 +2,7 @@
 # @Author: lshuns
 # @Date:   2020-05-24 12:25:48
 # @Last Modified by:   lshuns
-# @Last Modified time: 2020-06-11 14:55:11
+# @Last Modified time: 2020-07-11 14:20:06
 
 # plot of m-bias results
 
@@ -19,7 +19,7 @@ mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
 #mpl.rcParams['xtick.top'] = True
 #mpl.rcParams['ytick.right'] = True
-plt.rc('font', size=12)
+plt.rc('font', size=16)
 
 
 # +++ input
@@ -49,7 +49,7 @@ YLIM = [0.5, 5.5]
 XLIM = [-0.05, 0.05]
 
 fig, ax = plt.subplots()
-plt.subplots_adjust(left=0.2, bottom=0.1, right=0.98, top=0.9, wspace=0, hspace=0)
+plt.subplots_adjust(left=0.25, bottom=0.1, right=0.98, top=0.88, wspace=0, hspace=0)
 
 
 for i in range(len(infiles)):
@@ -114,7 +114,7 @@ plt.xlabel(XLABEL)
 # invert y-axis
 plt.gca().invert_yaxis()
 
-plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.13),
+plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.15),
              fancybox=True, shadow=True, ncol=3)
 
 plt.savefig(outpath, dpi=300)

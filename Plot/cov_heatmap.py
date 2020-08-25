@@ -2,7 +2,7 @@
 # @Author: lshuns
 # @Date:   2020-05-05 21:17:39
 # @Last Modified by:   lshuns
-# @Last Modified time: 2020-06-11 12:38:11
+# @Last Modified time: 2020-07-16 13:10:26
 
 # covariance matrix plot with heatmap
 
@@ -12,6 +12,7 @@ import seaborn as sns
 import numpy as np
 from matplotlib.colors import LogNorm
 plt.rcParams["text.usetex"] =True
+plt.rc('font', size=16)
 
 
 # +++++++++++++++++++++++++++++++++++++++ general setting
@@ -61,17 +62,18 @@ cov_comb_plot = cov_comb/cov_comb_norm
 # mpl.use('Agg')
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
-plt.rc('font', size=14)
+# plt.rc('font', size=14)
 
 ### normalized 
 fig, ax = plt.subplots()
-plt.subplots_adjust(left=0, bottom=0.05, right=1.0, top=0.99, wspace=0, hspace=0)
-# cmap = sns.diverging_palette(250, 0, sep=10, as_cmap=True)
+plt.subplots_adjust(left=0, bottom=0.06, right=0.99, top=0.98, wspace=0, hspace=0)
+# cmap = sns.light_palette((360, 100, 0), input="husl", as_cmap=True)
+cmap = 'Reds'
 sns.heatmap(
-    cov_comb_plot, ax=ax, cmap='Reds',
+    cov_comb_plot, ax=ax, cmap=cmap, vmin=0, vmax=1.0,
     xticklabels=False, yticklabels=False,
     square=True,
-    cbar_kws={'label': r'$C_{ij}/\sqrt{C_{ii}C_{jj}}$', 'ticks': [0.00, 0.15, 0.30, 0.45, 0.60, 0.75, 0.90]}
+    cbar_kws={'label': r'$C_{ij}/\sqrt{C_{ii}C_{jj}}$', 'ticks': [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]}
 )
 
 midp = len(cov_comb_plot[0,:])/2
