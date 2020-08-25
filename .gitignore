@@ -9,6 +9,8 @@ __pycache__/
 improvement.txt
 issues.txt
 nohup.out
+*.pdf
+*.png
 
 output/
 wornout/
