@@ -3,3 +3,5 @@
 For running, check out scripts/
 
 For cosmological modelling pipeline, check out https://github.com/lshuns/montepython_KV450
+
+For paper, check out https://arxiv.org/abs/2009.00367
